@@ -1,0 +1,176 @@
+<html>
+  <head>
+    <title>Embark</title>
+    <link rel="stylesheet" href="css/app.css">
+    <script src="js/app.js"></script>
+    <script type="text/javascript">
+    //26.03 testing as LoanDB not defined error was showing in consoel
+    //turns out the ethereum simulator node was not detected by embark
+/*    	var lnAddr = Loan.address.toString();
+    	alert(lnAddr);*/
+    	var dbAddr = LoanDB.address.toString();
+    	var ldb = new EmbarkJS.Contract({
+    		abi: LoanDB.abi,
+    		address: dbAddr
+    	});
+    </script>
+  </head>
+  <body class="container">
+    <h3>Welcome to Embark!</h3>
+    <p>See the <a href="https://github.com/iurimatias/embark-framework/wiki">Wiki</a> to see what you can do with Embark!</p>
+
+    <ul class='nav nav-tabs'>
+      <li class='active'><a data-toggle='tab' href='#intro'>Tab 1</a></li>
+      <li><a data-toggle='tab' href='#sand'>Tab 2</a></li>
+      <li><a data-toggle='tab' href='#tab3'>Tab 3</a></li>
+    </ul>
+
+    <div class='tab-content'>
+      <div id='intro' class='tab-pane active'>
+        <h3>The Basic Components</h3>
+
+        <ul>
+          <li>LoanDB - holds an array Loan addresses</li>
+          <li>Loan - the actual Loan objects</li>
+        </ul>
+
+        <p>As it currently stands I am scrapping the Wallet (user account) functionality so I can actually build a final product of some sort. Implementation has been far less straightforward than orginally thought.</p>
+
+        <p>Basic functionality of the standard components are demonstrated below. More complex functionality will be explored on other tabs</p>
+
+        <hr>
+
+        <div class="form-group accts">
+          <h3>Accounts and Balances</h3>
+          <p>Press button to show all private accounts and their balances</p>
+          <button>Update</button>
+          <div class="result"></div>
+        </div>
+
+        <hr>
+
+        <div class="loandb">
+          <h3>LoanDB</h3>
+          <ul>
+            <li>There will be only one LoanDB object on the blockchain</li>
+            <li>The address of this contract must be known (public) for the app to function</li>
+            <li>jQuery is used to retrieve information on all of the Loans and display it to the user in this front-end</li>
+          </ul>
+
+          <div class="form-group addr">
+            <h4>LoanDB Address</h4>
+            <div class="result"></div>
+          </div>
+
+          <!-- sol and js required -->
+          <div class="form-group len">
+            <h4>LoanDB Length</h4>
+            <p>The number of entries in LoanDB</p>
+            <button>Get # of loans</button>
+            <div class="result"></div>
+          </div>
+
+          <div class="form-group ls">
+            <h4>List Loans</h4>
+            <p>List the addresses of the loans in LoanDB. Should also retrieve all of the relevant info for users e.g. amount, amt repayable, days to repay etc</p>
+            <button>List loans</button>
+            <div class="result"></div>
+          </div>
+
+          <!--24.03 -->
+          <!--formerly retrieved loan amount i.e. amt() -->
+          <div class="form-group lnbal">
+            <h4>Get Loan Bal</h4>
+            <input placeholder="enter loan address" />
+            <button>Get loan balance</button>
+            <div class="result"></div>
+          </div>
+
+          <!--24.03 changed to have repayable field as well-->
+          <!-- going to try to send balance to loan -->
+          <!-- going to try and kill loan to get balance back -->
+          <div class="form-group add">
+          	<h4>Add Loan</h4>
+          	<p>Enter loan parameters</p>
+          	<input class="amt" placeholder="amount" />
+          	<input class="rpy" placeholder="repayable" />
+          	<button>Add loan</button>
+          	<div class="result"></div>
+          </div>
+
+          <!--24.03 kill loan-->
+          <!--must remove entry from db-->
+          <!--and remove it from the blockchain-->
+          <div class="form-group rm">
+            <h4>Remove Loan</h4>
+            <input placeholder="enter index" />
+            <button>Remove loan</button>
+            <div class="result"></div>
+          </div>
+
+          <div class="form-group inspect">
+            <h4>Inspect Loan</h4>
+            <input placeholder="enter index" />
+            <button>Inspect loan</button>
+            <div class="result"></div>
+          </div>
+
+          <div class="form-group cur">
+            <h4>Current Loan</h4>
+            <button>Get current</button>
+            <div class="result"></div>
+          </div>
+
+        </div>
+
+        <hr>
+
+      	<h3>Loan</h3>
+
+      </div>
+
+      <div id='sand' class='tab-pane'>
+        <h3>Sandbox testing area</h3>
+        <p>This area is used for testing during implementation</p>
+        <p>It can also serve as a log for the development process</p>
+
+        <h3>23 March</h3>
+
+        <div class="form-group dbmod">
+          <h4>Modified Loan DB</h4>
+          <p>Previous LoanDB stored an array of addresses, not an array of Loans. In other words the LoanDB and Loan contracts didn't actually talk to each other. Due to difficulties in retrieving state, I am looking to re-design the LoanDB contract to store an array of Loans. I am concerned that it might become difficult to retreive state this way</p>
+
+          <p>I am going to make one more attempt at retrieving Loan state entirely through jQuery manipulation of the LoanDB address array</p>
+
+          <p>The issue relates to promises and the scope of the returned variables</p>
+
+          <div class="mk">
+            <h4>Make Loans for modded DB</h4>
+            <button>make loans</button>
+            <div class="result"></div>
+          </div>
+
+          <div class="get">
+          	<h4>Get Loan from modded DB</h4>
+          	<input placeholder="enter index" />
+          	<button>get</button>
+          	<div class="result"></div>
+          </div>
+
+          <div class="get-amt">
+            <h4>Get amount of loan at index</h4>
+            <input placeholder ="enter index" />
+            <button>get</button>
+            <div class="result"></div>
+          </div>
+        	
+        </div>
+       
+      </div>
+
+      <div id='tab3' class='tab-pane'>
+        <h3>Tab 3 stuff here</h3>
+      </div>
+    </div>
+  </body>
+</html>
