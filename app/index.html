@@ -13,6 +13,9 @@
     		abi: LoanDB.abi,
     		address: dbAddr
     	});
+    	var cb = web3.eth.coinbase;
+    	alert(cb);
+    	//alert(web3.eth.coinbase);
     </script>
   </head>
   <body class="container">
@@ -45,6 +48,26 @@
           <p>Press button to show all private accounts and their balances</p>
           <button>Update</button>
           <div class="result"></div>
+        </div>
+
+        <!-- 26.03 test
+        send ether from one address to another
+        i suspect that i can't as i haven't figured out how to unlock these accounts
+        -->
+        <div class="form-group tx">
+        	<h3>Transfer ether</h3>
+        	<input class="tgt" placeholder="target address" />
+        	<input class="amt" placeholder="amt in ether" />
+        	<button>Transfer</button>
+        	<div class="result"></div>
+        </div>
+
+        <div class="form-group fund">
+        	<h3>Fund contract</h3>
+        	<input class="tgt" placeholder="target address" />
+        	<input class="amt" placeholder="amt in ether" />
+        	<button>Transfer</button>
+        	<div class="result"></div>
         </div>
 
         <hr>

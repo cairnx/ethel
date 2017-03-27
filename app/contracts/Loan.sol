@@ -9,7 +9,7 @@ contract Loan is Mortal {
 	uint public amt;
 	uint public rpy;
 
-	function Loan(uint _amt, uint _rpy) {
+	function Loan (uint _amt, uint _rpy) payable {
 		amt = _amt;
 		rpy = _rpy;
 	}
@@ -26,5 +26,8 @@ contract Loan is Mortal {
 
 	function setRpy(uint _rpy) {
 		rpy = _rpy;
+	}
+
+	function() payable {
 	}
 }

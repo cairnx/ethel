@@ -11,15 +11,42 @@ $(document).ready(function() {
 
   //.accts
   $('#intro .accts button').click(function() {
+  	$('#intro .accts .result').html('');
   	web3.eth.getAccounts(function(err, accounts) {
   		for(var i = 0; i < accounts.length; i++) {
   			(function(i) {
   				var address = accounts[i];
   				var balance = web3.fromWei(web3.eth.getBalance(accounts[i]));
-  				$('#intro .accts .result').append('<br />' + i + '&emsp;' + address + '&emsp;' + balance);
+  				$('#intro .accts .result').append('<br />' + i + ': ' + address + ': ' + balance);
   			})(i);
   		}
   	});
+  });
+
+  //26.03
+  //tx from one address to another test
+  //surprise: it works
+  //for main accounts only
+  // can't fund contracts
+  //see below for attempt to fund contracts
+  $('#intro .tx button').click(function() {
+  	var amt = web3.toWei($('#intro .tx .amt').val());
+  	var tgt = $('#intro .tx .tgt').val();
+  	web3.eth.sendTransaction({to: tgt, value: amt}, function(err, result) {
+  		$('#intro .tx .result').html('sent ' + web3.fromWei(amt, 'ether') + ' to ' + tgt);
+  	});
+  });
+
+  //26.03
+  //fund contracts
+  //it turns out that this wasnt working because of i had .button instead of button
+  //stupid
+  $('#intro .fund button').click(function() {
+  	var amt = web3.toWei($('#intro .fund .amt').val());
+  	var tgt = $('#intro .fund .tgt').val();
+		web3.eth.sendTransaction({to: tgt, value: amt}, function(err, result) {
+			alert('is it working?');
+		});
   });
 
   //.loandb
@@ -33,6 +60,7 @@ $(document).ready(function() {
 		});
 	});
 
+	//marked for deletion 26.03
 	$('#intro .loandb .ls_ button').click(function() {
 		LoanDB.getLen().then(function(len) {
 			$('#intro .loandb .ls .result').html('');
@@ -65,6 +93,14 @@ $(document).ready(function() {
 	//retrying the display loan content bit
 	//24.03
 	//added repay amount get
+	//26.03
+	//need to rework loans so that
+	//amount is = to balance of new loan
+	//i.e. set amount not necessary
+	//make Loan payable
+	//fund loan
+	//amt() should return balance
+	//or not required at all. should just be web3.eth.getBalance()
 	$('#intro .loandb .ls button').click(function() {
 		//first get the array length
 		LoanDB.getLen().then(function(len) {
@@ -81,11 +117,19 @@ $(document).ready(function() {
 								abi: Loan.abi,
 								address: addr
 							});
-							curLoan.amt().then(function(amt) {
+
+/*							curLoan.amt().then(function(amt) {
+								amt = web3.fromWei(amt, 'ether');
 								curLoan.rpy().then(function(rpy) {
 								  $('#intro .loandb .ls .result').append('<br> '+ i + ': ' + addr + ': ' + amt + ', ' + rpy);
 								});
+							});*/
+
+							curLoan.rpy().then(function(rpy) {
+								var amt = web3.fromWei(web3.eth.getBalance(addr), 'ether');
+								$('#intro .loandb .ls .result').append('<br> ' +  i + ': ' + addr + ': ' + amt + ', ' + rpy);
 							});
+
 						});
 					})(i);
 				}
@@ -107,12 +151,15 @@ $(document).ready(function() {
   //take address -> set new EmbarkJS.Contract({ abi, addr }) -> newContract.myMethod().then(etc)
   //change to retrieve actual balance of a given address
   //could be account or contract
+  //26.03
+  //funding functionality added in .add
+  //check balance with this
 	$('#intro .loandb .lnbal button').click(function() {
 		//take the input address
 		//set the curLoan
 		var addr = $('#intro .loandb .lnbal input').val();
 
-		var bal = web3.eth.getBalance(addr);
+		var bal = web3.fromWei(web3.eth.getBalance(addr),'ether');
 
 		$('#intro .loandb .lnbal .result').html('' + bal);
 
@@ -140,15 +187,29 @@ $(document).ready(function() {
 	//Loan contracts need to be funded from the creator account
 	//web3.eth.sendTransaction({txObj})
 	$('#intro .loandb .add button').click(function() {
-		var amt = $('#intro .loandb .add input.amt').val();
+		var amt = web3.toWei($('#intro .loandb .add input.amt').val());
+		//amt = web3.toWei(amt, 'ether');
 		var rpy = $('#intro .loandb .add input.rpy').val();
 
-		Loan.deploy([amt, rpy], {value: web3.fromWei(amt, ether)}).then(function(deployedLoan) {
+		//26.03
+		//added Loan.deploy([args],{txOptions})
+		Loan.deploy([amt, rpy], {value: amt}).then(function(deployedLoan) {
 			curLoan = deployedLoan;
-			$('#intro .loandb .add .result').append('<br>Loan deployed: ' + deployedLoan.address + '(' + amt + ',' +' ' + rpy +')');
+			$('#intro .loandb .add .result').append('<br>Loan deployed: ' + deployedLoan.address + '(' + web3.fromWei(amt,'ether') + ',' +' ' + rpy +')');
 
 			ldb.addLoan(deployedLoan.address).then(function() {
 				$('#intro .loandb .add .result').append(' added to db');
+
+				web3.eth.sendTransaction({to: deployedLoan.address, value: amt});
+
+/*				web3.eth.getCoinbase(function(err, addr) {
+					$('#intro .loandb .add .result').append('<br> from addr: ' + addr);
+				});*/
+
+				//26.03 marked for deletion
+/*				web3.eth.getBalance(deployedLoan.address, function(err, result) {
+					alert(result);
+				});*/
 
 				//26.03 attempting to send funds to Loan
 /*				web3.eth.sendTransaction({to: deployedLoan.address, value: amt * 1 ether}).then(function() {
