@@ -15,12 +15,12 @@ $(document).ready(function() {
 
 	//02.04
 	//set current user account
-	$('#intro .main-acct button').click(function() {
-	  curAcct = $('#intro .main-acct .newAddr').val();
+	$('#intro .cur-acct button').click(function() {
+	  curAcct = $('#intro .cur-acct .newAddr').val();
 		if (curAcct === "") {
 			curAcct = web3.eth.defaultAccount;
 		}
-		$('#intro .main-acct .result').html(curAcct);
+		$('#intro .cur-acct .result').html(curAcct);
 	});
 
   //.accts
@@ -49,18 +49,17 @@ $(document).ready(function() {
   //see below for attempt to fund contracts
 
   //02.04 experimentation
-  //not yet integrated with curAcct
   $('#intro .tx button').click(function() {
   	var amt = web3.toWei($('#intro .tx .amt').val());
   	var tgt = $('#intro .tx .tgt').val();
-  	var frm = $('#intro .tx .frm').val();
+  	//var frm = $('#intro .tx .frm').val();
   	//uses accounts[0] if frm is undefined
-  	if (frm === "") {
+/*  	if (frm === "") {
   		alert('hello');
   		var accts = web3.eth.accounts;
   		frm = accts[0];
-  	}
-  	web3.eth.sendTransaction({from: frm, to: tgt, value: amt}, function(err, result) {
+  	}*/
+  	web3.eth.sendTransaction({from: curAcct, to: tgt, value: amt}, function(err, result) {
   		$('#intro .tx .result').html('sent: ' + web3.fromWei(amt, 'ether') + ' ether<br />from ' + frm + ' <br />tgt ' + tgt);
   	});
   });

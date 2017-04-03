@@ -50,7 +50,7 @@
         <hr>
 
         <!-- 02.04 added to switch between main users -->
-        <div class="form-group main-acct" id="main-acct">
+        <div class="form-group cur-acct" id="cur-acct">
         	<h3>Current User Account</h3>
         	<p>The address used as msg.sender for contract function calls</p>
         	<p>Blank input sets this to web3.eth.defaultAccount</p>
@@ -72,10 +72,8 @@
         -->
         <div class="form-group tx">
         	<h3>Transfer ether</h3>
-        	<p>Transfers ether from one account to another</p>
-        	<p>02.04 Works for user controlled accounts</p>
-        	<p>Experiment: Sending ether from one contract to another (pending)</p>
-        	<input class="frm" placeholder="from (blank = accts[0])" />
+        	<p>Transfers ether from one account to another<br />
+        	ether is sent from curAcct</p>
         	<input class="tgt" placeholder="target address" />
         	<input class="amt" placeholder="amt in ether" />
         	<button>Transfer</button>
@@ -88,7 +86,7 @@
         	<p>Balance of the loan is sent to borrower address</p>
         	<p>Borrower and loan explicitly specified for experimentational purposes</p>
         	<p>Updated 02.04</p>
-        	<p>blank borrower input sets recipient to be <a href="#main-acct">curAcct</a></p>
+        	<p>blank borrower input sets recipient to be the <a href="#cur-acct">current user account</a></p>
         	<input class="loan" placeholder="loan address" />
       		<input class="tgt" placeholder="borrower addr" />
       		<button>Send</button>
