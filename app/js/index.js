@@ -5,9 +5,23 @@ $(document).ready(function() {
 	var addrReg; //23.03 marked for deletion
 	var loans = []; //24.03 marked for deletion - promises wont let me store loans in a JS variable
 
+	//02.04
+	curAcct = web3.eth.defaultAccount;
+	$('#intro .main-acct .result').html(curAcct);
+
 	//23.03
 	//var dbAd = LoanDB.address;
 	//dbAd unnecessary as var dbAddr created in index html
+
+	//02.04
+	//set current user account
+	$('#intro .main-acct button').click(function() {
+	  curAcct = $('#intro .main-acct .newAddr').val();
+		if (curAcct === "") {
+			curAcct = web3.eth.defaultAccount;
+		}
+		$('#intro .main-acct .result').html(curAcct);
+	});
 
   //.accts
   $('#intro .accts button').click(function() {
@@ -23,31 +37,78 @@ $(document).ready(function() {
   	});
   });
 
+  //02.04
+  //add default account setters and getters
+
+
   //26.03
   //tx from one address to another test
   //surprise: it works
   //for main accounts only
   // can't fund contracts
   //see below for attempt to fund contracts
+
+  //02.04 experimentation
+  //not yet integrated with curAcct
   $('#intro .tx button').click(function() {
   	var amt = web3.toWei($('#intro .tx .amt').val());
   	var tgt = $('#intro .tx .tgt').val();
-  	web3.eth.sendTransaction({to: tgt, value: amt}, function(err, result) {
-  		$('#intro .tx .result').html('sent ' + web3.fromWei(amt, 'ether') + ' to ' + tgt);
+  	var frm = $('#intro .tx .frm').val();
+  	//uses accounts[0] if frm is undefined
+  	if (frm === "") {
+  		alert('hello');
+  		var accts = web3.eth.accounts;
+  		frm = accts[0];
+  	}
+  	web3.eth.sendTransaction({from: frm, to: tgt, value: amt}, function(err, result) {
+  		$('#intro .tx .result').html('sent: ' + web3.fromWei(amt, 'ether') + ' ether<br />from ' + frm + ' <br />tgt ' + tgt);
   	});
+  });
+
+  //02.04
+  //integrated with curAcct
+  $('#intro .send-brw button').click(function() {
+  	var loan = $('#intro .send-brw .loan').val();
+  	var tgt = $('#intro .send-brw .tgt').val();
+
+  	if (tgt === "") {
+  		tgt = curAcct;
+  	}
+
+ 	  curLoan = new EmbarkJS.Contract({
+			abi: Loan.abi,
+			address: loan
+		});
+
+		var balance = web3.fromWei(web3.eth.getBalance(loan), 'ether');
+
+		//first attempt
+		//cahnged tgt to curAcct
+ 	  curLoan.sendToBorrower({from: tgt}).then(function(success) {
+ 	  	if (success) {
+ 	  		$('#intro .send-brw .result').html('' + balance + ' ether sent<br /> to account: ' + tgt + '<br />from Loan: ' + loan);
+
+ 	  		//$('#intro .send-brw .result').html('Loan ' + loan + ' sent ' + balance + ' to ' + tgt);
+ 	  	}
+ 	  	else {
+ 	  		$('#intro .send-brw .result').html('Something went wrong');
+ 	  	}
+ 	  });
   });
 
   //26.03
   //fund contracts
   //it turns out that this wasnt working because of i had .button instead of button
   //stupid
-  $('#intro .fund button').click(function() {
+  
+/*  $('#intro .fund button').click(function() {
   	var amt = web3.toWei($('#intro .fund .amt').val());
   	var tgt = $('#intro .fund .tgt').val();
 		web3.eth.sendTransaction({to: tgt, value: amt}, function(err, result) {
 			alert('is it working?');
 		});
-  });
+  });*/
+
 
   //.loandb
 	//show LoanDB address
@@ -55,14 +116,14 @@ $(document).ready(function() {
 
 
 	$('#intro .loandb .len button').click(function() {
-		LoanDB.getLen().then(function(len) {
+		LoanDB.getLen({from:curAcct}).then(function(len) {
 			$('#intro .loandb .len .result').html('Length: ' + len);
 		});
 	});
 
 	//marked for deletion 26.03
 	$('#intro .loandb .ls_ button').click(function() {
-		LoanDB.getLen().then(function(len) {
+		LoanDB.getLen({from:curAcct}).then(function(len) {
 			$('#intro .loandb .ls .result').html('');
 			if (len == 0) {
 				$('#intro .loandb .ls .result').html('No Loans found');
@@ -70,7 +131,7 @@ $(document).ready(function() {
 			else {
 				for (var i = 0; i < len; i++) {
 					(function (i) {
-						LoanDB.getLoan(i).then(function(addr) {
+						LoanDB.getLoan(i, {from:curAcct}).then(function(addr) {
 							$('#intro .loandb .ls .result').append('<br>' + i + ': ' + addr);
 							//23.03 i am running into issues because of how promises work
 //							loans[i] = addr;
@@ -103,7 +164,7 @@ $(document).ready(function() {
 	//or not required at all. should just be web3.eth.getBalance()
 	$('#intro .loandb .ls button').click(function() {
 		//first get the array length
-		LoanDB.getLen().then(function(len) {
+		LoanDB.getLen({from:curAcct}).then(function(len) {
 			$('#intro .loandb .ls .result').html('');
 			if (len == 0 ) {
 				$('#intro .loandb .ls .result').html('No Loans found');
@@ -111,7 +172,7 @@ $(document).ready(function() {
 			else {
 				for (var i = 0; i < len; i++) {
 					(function (i) {
-						LoanDB.getLoan(i).then(function(addr) {
+						LoanDB.getLoan(i, {from:curAcct}).then(function(addr) {
 							//$('#intro .loandb .ls .result').append('<br>' + i + ': ' + addr);
 							curLoan = new EmbarkJS.Contract({
 								abi: Loan.abi,
@@ -193,14 +254,14 @@ $(document).ready(function() {
 
 		//26.03
 		//added Loan.deploy([args],{txOptions})
-		Loan.deploy([amt, rpy], {value: amt}).then(function(deployedLoan) {
+		Loan.deploy([amt, rpy], {from: curAcct, value: amt}).then(function(deployedLoan) {
 			curLoan = deployedLoan;
 			$('#intro .loandb .add .result').append('<br>Loan deployed: ' + deployedLoan.address + '(' + web3.fromWei(amt,'ether') + ',' +' ' + rpy +')');
 
-			ldb.addLoan(deployedLoan.address).then(function() {
+			ldb.addLoan(deployedLoan.address, {from: curAcct}).then(function() {
 				$('#intro .loandb .add .result').append(' added to db');
 
-				web3.eth.sendTransaction({to: deployedLoan.address, value: amt});
+				web3.eth.sendTransaction({from: curAcct, to: deployedLoan.address, value: amt});
 
 /*				web3.eth.getCoinbase(function(err, addr) {
 					$('#intro .loandb .add .result').append('<br> from addr: ' + addr);
@@ -229,14 +290,14 @@ $(document).ready(function() {
 	$('#intro .loandb .rm button').click(function() {
 		var index = $('#intro .loandb .rm input').val();
 
-		LoanDB.getLoan(index).then(function(addr) {
+		LoanDB.getLoan(index, {from:curAcct}).then(function(addr) {
 			curLoan = new EmbarkJS.Contract({
 				abi: Loan.abi,
 				address: addr
 			});
-			curLoan.kill().then(function() {
+			curLoan.kill({from:curAcct}).then(function() {
 				var rmAddr = addr.toString();
-				LoanDB.rmLoan(index).then(function() {
+				LoanDB.rmLoan(index, {from:curAcct}).then(function() {
 					$('#intro .loandb .rm .result').html('removed loan: ' + rmAddr);
 				});
 			});
@@ -259,7 +320,7 @@ $(document).ready(function() {
 	//23.03 better termed as set current loan
 	$('#intro .loandb .inspect button').click(function() {
 		var index = $('#intro .loandb .inspect input').val();
-		LoanDB.getLoan(index).then(function(addr) {
+		LoanDB.getLoan(index, {from: curAcct}).then(function(addr) {
 			curLoanIndex = index;
 			curLoan= new EmbarkJS.Contract({
   	    abi: Loan.abi,
@@ -279,14 +340,14 @@ $(document).ready(function() {
 
   //handlers for the modded loandb
   $('#sand .dbmod .mk button').click(function() {
-  	LoanDB.mkLns().then(function() {
+  	LoanDB.mkLns({from:curAcct}).then(function() {
   		$('#sand .dbmod .mk result').html('added loans');
   	});
   });
 
   $('#sand .dbmod .get-amt button').click(function() {
   	var index = ('#sand .dbmod .get-amt input').val();
-  	ldb.getLnAmt(index).then(function(amt) {
+  	ldb.getLnAmt(index, {from:curAcct}).then(function(amt) {
   		$('#sand .dbmod .get-amt .result').html(amt);
   	});
   });

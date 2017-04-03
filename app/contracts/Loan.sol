@@ -30,4 +30,12 @@ contract Loan is Mortal {
 
 	function() payable {
 	}
+
+
+	//02.04 added as part of experimentation
+	function sendToBorrower() returns (bool) {
+		address borrower = msg.sender;
+		return borrower.send(this.balance);
+	}
+
 }

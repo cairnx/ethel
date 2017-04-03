@@ -1,6 +1,6 @@
 <html>
   <head>
-    <title>Embark</title>
+    <title>ethl - Ethereum Blockchain P2P Lending</title>
     <link rel="stylesheet" href="css/app.css">
     <script src="js/app.js"></script>
     <script type="text/javascript">
@@ -13,19 +13,24 @@
     		abi: LoanDB.abi,
     		address: dbAddr
     	});
-    	var cb = web3.eth.coinbase;
-    	alert(cb);
+
+    	var curAcct;
+
+    	//marked for deletion
+    	//var cb = web3.eth.coinbase;
+    	//alert(cb);
     	//alert(web3.eth.coinbase);
     </script>
   </head>
   <body class="container">
-    <h3>Welcome to Embark!</h3>
-    <p>See the <a href="https://github.com/iurimatias/embark-framework/wiki">Wiki</a> to see what you can do with Embark!</p>
+    <h3>Welcome to ethl!</h3>
+    <p>Under development</p>
+    <p>Built using the Embark framework. See the <a href="https://github.com/iurimatias/embark-framework/wiki">Wiki</a> to see what you can do with Embark!</p>
 
     <ul class='nav nav-tabs'>
-      <li class='active'><a data-toggle='tab' href='#intro'>Tab 1</a></li>
-      <li><a data-toggle='tab' href='#sand'>Tab 2</a></li>
-      <li><a data-toggle='tab' href='#tab3'>Tab 3</a></li>
+      <li class='active'><a data-toggle='tab' href='#intro'>Work area</a></li>
+      <li><a data-toggle='tab' href='#sand'>Temp</a></li>
+      <li><a data-toggle='tab' href='#worklog'>Work log</a></li>
     </ul>
 
     <div class='tab-content'>
@@ -37,11 +42,22 @@
           <li>Loan - the actual Loan objects</li>
         </ul>
 
+        <p>23.03</p>
         <p>As it currently stands I am scrapping the Wallet (user account) functionality so I can actually build a final product of some sort. Implementation has been far less straightforward than orginally thought.</p>
 
         <p>Basic functionality of the standard components are demonstrated below. More complex functionality will be explored on other tabs</p>
 
         <hr>
+
+        <!-- 02.04 added to switch between main users -->
+        <div class="form-group main-acct" id="main-acct">
+        	<h3>Current User Account</h3>
+        	<p>The address used as msg.sender for contract function calls</p>
+        	<p>Blank input sets this to web3.eth.defaultAccount</p>
+        	<input class="newAddr" placeholder="enter user address" />
+        	<button>Update</button>
+        	<div class="result"></div>
+        </div>
 
         <div class="form-group accts">
           <h3>Accounts and Balances</h3>
@@ -56,12 +72,31 @@
         -->
         <div class="form-group tx">
         	<h3>Transfer ether</h3>
+        	<p>Transfers ether from one account to another</p>
+        	<p>02.04 Works for user controlled accounts</p>
+        	<p>Experiment: Sending ether from one contract to another (pending)</p>
+        	<input class="frm" placeholder="from (blank = accts[0])" />
         	<input class="tgt" placeholder="target address" />
         	<input class="amt" placeholder="amt in ether" />
         	<button>Transfer</button>
         	<div class="result"></div>
         </div>
 
+        <!-- 02.04 added for experiment -->
+        <div class="form-group send-brw">
+        	<h3>Send ether from Loan to Borrower</h3>
+        	<p>Balance of the loan is sent to borrower address</p>
+        	<p>Borrower and loan explicitly specified for experimentational purposes</p>
+        	<p>Updated 02.04</p>
+        	<p>blank borrower input sets recipient to be <a href="#main-acct">curAcct</a></p>
+        	<input class="loan" placeholder="loan address" />
+      		<input class="tgt" placeholder="borrower addr" />
+      		<button>Send</button>
+      		<div class="result"></div>
+        </div>
+
+
+<!-- 02.04
         <div class="form-group fund">
         	<h3>Fund contract</h3>
         	<input class="tgt" placeholder="target address" />
@@ -69,6 +104,7 @@
         	<button>Transfer</button>
         	<div class="result"></div>
         </div>
+-->
 
         <hr>
 
@@ -146,9 +182,8 @@
 
         </div>
 
-        <hr>
-
-      	<h3>Loan</h3>
+        <!-- 02.04 marked for deletion -->
+      	<!--<h3>Loan</h3>-->
 
       </div>
 
@@ -191,8 +226,49 @@
        
       </div>
 
-      <div id='tab3' class='tab-pane'>
-        <h3>Tab 3 stuff here</h3>
+      <div id='worklog' class='tab-pane'>
+        <h3>Development Worklog</h3>
+        <h4>02.04</h4>
+        <p><b>Notes</b></p>
+        <p>
+        Added worklog to site<br />
+        Need to reassess ether transfer functionality<br />   
+        Added getter, setter, handler for defaultAccount</p>
+        <ul>
+          <li>js variable @ index.html stores initial default account</li>
+          <li>handler required for above</li>
+          <li>getter + setter + handlers</li>
+          <li>sendTransactions to use defaultAccount address for txs from user controlled accs</li>
+        </ul>
+        <p style="bold">All contract interactions might need a from account explicitly specified</p>
+        <p>Might need to add a current user account switcher to go with the above</p>
+
+        <p><b>End of session</b></p>
+        <p>
+        	Worklog added<br />
+        	Current account switcher added - var curAcct<br />
+        	Must ensure that all transactions specify the sender address<br />
+        	Confirmed that ether can be funded from:
+        	<ul>
+        	  <li>account to account</li>
+        	  <li>account to loan</li>
+        	  <li>loan to account</li>
+        	</ul>
+        </p>
+
+        <p><b>Next steps</b></p>
+        <p>
+        	Implement some kind of security<br />
+        	Possible login with hashed passcodes and a mapping of passcodes to accounts in LoanDB<br />
+        	Allow only lender and borrower to interact with certain loan functions<br />
+        	More fields and functions required in Loan.sol<br />
+        	Credit ratings in LoanDB<br />
+        </p>
+
+        <h3>Documented Experiments</h3>
+       	<ul>
+       		<li>Experiment 1 - 02.04</li>
+        </ul>
       </div>
     </div>
   </body>

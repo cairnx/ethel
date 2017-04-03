@@ -78452,10 +78452,10 @@ if (typeof web3 !== 'undefined' && typeof Web3 !== 'undefined') {
 }
 web3.eth.defaultAccount = web3.eth.accounts[0];
 
-Loan = new EmbarkJS.Contract({abi: [{"constant":false,"inputs":[{"name":"_rpy","type":"uint256"}],"name":"setRpy","outputs":[],"payable":false,"type":"function"},{"constant":true,"inputs":[],"name":"amt","outputs":[{"name":"","type":"uint256"}],"payable":false,"type":"function"},{"constant":false,"inputs":[],"name":"kill","outputs":[],"payable":false,"type":"function"},{"constant":true,"inputs":[],"name":"rpy","outputs":[{"name":"","type":"uint256"}],"payable":false,"type":"function"},{"constant":false,"inputs":[{"name":"_amt","type":"uint256"}],"name":"setAmt","outputs":[],"payable":false,"type":"function"},{"constant":false,"inputs":[{"name":"newOwner","type":"address"}],"name":"transferOwnership","outputs":[],"payable":false,"type":"function"},{"inputs":[{"name":"_amt","type":"uint256"},{"name":"_rpy","type":"uint256"}],"payable":true,"type":"constructor"},{"payable":true,"type":"fallback"}], address: '0x8083b2ac655614f9564bb8769ac032df1f085e44', code: '60606040818152806102038339810160405280516020909101515b5b60008054600160a060020a03191633600160a060020a03161790555b600182905560028190555b50505b6101af806100546000396000f3006060604052361561005c5763ffffffff60e060020a6000350416630b39d771811461006557806316eab96b1461007757806341c0e1b514610096578063717d6bc2146100a5578063d8fbd5a0146100c4578063f2fde38b146100d6575b6100635b5b565b005b34610000576100636004356100f1565b005b34610000576100846100fa565b60408051918252519081900360200190f35b3461000057610063610100565b005b346100005761008461012c565b60408051918252519081900360200190f35b3461000057610063600435610132565b005b3461000057610063600160a060020a036004351661013b565b005b60028190555b50565b60015481565b60005433600160a060020a0390811691161461011b57610000565b600054600160a060020a0316ff5b5b565b60025481565b60018190555b50565b60005433600160a060020a0390811691161461015657610000565b6000805473ffffffffffffffffffffffffffffffffffffffff1916600160a060020a0383161790555b5b505600a165627a7a72305820345ddb6d8e1708adcccfd46c7d77c0a3911ffc24bc6f0311faf977f69c846ebe0029', gasEstimates: {"creation":[60332,86200],"external":{"":226,"amt()":264,"kill()":383,"rpy()":308,"setAmt(uint256)":20247,"setRpy(uint256)":20159,"transferOwnership(address)":20524},"internal":{"()":10}}});
-LoanDB = new EmbarkJS.Contract({abi: [{"constant":true,"inputs":[{"name":"index","type":"uint256"}],"name":"getLn","outputs":[{"name":"","type":"address"}],"payable":false,"type":"function"},{"constant":false,"inputs":[{"name":"index","type":"uint256"}],"name":"setLoan","outputs":[],"payable":false,"type":"function"},{"constant":false,"inputs":[],"name":"mkLns","outputs":[],"payable":false,"type":"function"},{"constant":true,"inputs":[],"name":"getLen","outputs":[{"name":"","type":"uint256"}],"payable":false,"type":"function"},{"constant":false,"inputs":[{"name":"loan","type":"address"}],"name":"addLoan","outputs":[],"payable":false,"type":"function"},{"constant":true,"inputs":[{"name":"n","type":"uint256"}],"name":"getLoan","outputs":[{"name":"loan","type":"address"}],"payable":false,"type":"function"},{"constant":true,"inputs":[{"name":"index","type":"uint256"}],"name":"getLnAmt","outputs":[{"name":"","type":"uint256"}],"payable":false,"type":"function"},{"constant":false,"inputs":[{"name":"n","type":"uint256"}],"name":"rmLoan","outputs":[],"payable":false,"type":"function"},{"inputs":[],"payable":false,"type":"constructor"},{"anonymous":false,"inputs":[{"indexed":false,"name":"str","type":"string"}],"name":"Debug","type":"event"}], address: '0x3a4a4eb251ec9df487855cb4417a657a23e7c78b', code: '606060405234610000575b5b5b61049f8061001b6000396000f300606060405236156100725763ffffffff60e060020a600035041663047f1d798114610077578063126d0854146100a35780634435c3aa146100b55780634a90be57146100c45780634e38e3a2146100e3578063504006ca146100fe578063d46f6cc41461012a578063f324f7571461014c575b610000565b346100005761008760043561015e565b60408051600160a060020a039092168252519081900360200190f35b34610000576100b3600435610194565b005b34610000576100b3610198565b005b34610000576100d161019b565b60408051918252519081900360200190f35b34610000576100b3600160a060020a03600435166101a2565b005b3461000057610087600435610219565b60408051600160a060020a039092168252519081900360200190f35b34610000576100d160043561024f565b60408051918252519081900360200190f35b34610000576100b36004356102d8565b005b6000600182815481101561000057906000526020600020900160005b9054906101000a9004600160a060020a031690505b919050565b5b50565b5b565b6000545b90565b600080548060010182818154818355818115116101e4576000838152602090206101e49181019083015b808211156101e057600081556001016101cc565b5090565b5b505050916000526020600020900160005b8154600160a060020a038086166101009390930a92830292021916179055505b50565b6000600082815481101561000057906000526020600020900160005b9054906101000a9004600160a060020a031690505b919050565b6000600182815481101561000057906000526020600020900160005b9054906101000a9004600160a060020a0316600160a060020a03166316eab96b6000604051602001526040518163ffffffff1660e060020a028152600401809050602060405180830381600087803b156100005760325a03f115610000575050604051519150505b919050565b600080541115806102ea575060005481115b156102f457610194565b600054600114156103825780151561037d57600081815481101561000057906000526020600020900160005b6101000a815490600160a060020a0302191690556000805480919060019003815481835581811511610377576000838152602090206103779181019083015b808211156101e057600081556001016101cc565b5090565b5b505050505b610194565b6000805460001981019081101561000057906000526020600020900160005b9054906101000a9004600160a060020a0316600082815481101561000057906000526020600020900160005b6101000a815481600160a060020a030219169083600160a060020a031602179055506000600160008054905003815481101561000057906000526020600020900160005b6101000a815490600160a060020a0302191690556000805480919060019003815481835581811511610468576000838152602090206104689181019083015b808211156101e057600081556001016101cc565b5090565b5b505050505b5b5b505600a165627a7a72305820e9a7b5d05cfcdf71141ccce48e01f5b48aaacac01e12e6491a476a502e0873030029', gasEstimates: {"creation":[269,236600],"external":{"addLoan(address)":null,"getLen()":309,"getLn(uint256)":501,"getLnAmt(uint256)":null,"getLoan(uint256)":611,"mkLns()":186,"rmLoan(uint256)":66766,"setLoan(uint256)":172},"internal":{}}});
-Mortal = new EmbarkJS.Contract({abi: [{"constant":false,"inputs":[],"name":"kill","outputs":[],"payable":false,"type":"function"},{"constant":false,"inputs":[{"name":"newOwner","type":"address"}],"name":"transferOwnership","outputs":[],"payable":false,"type":"function"}], address: '0x52a7a8a29d9090d0701e9029397b64d1e318818f', code: '60606040525b60008054600160a060020a03191633600160a060020a03161790555b5b60ec806100306000396000f300606060405263ffffffff60e060020a60003504166341c0e1b58114602c578063f2fde38b146038575b6000565b3460005760366050565b005b346000576036600160a060020a0360043516607a565b005b60005433600160a060020a039081169116146069576000565b600054600160a060020a0316ff5b5b565b60005433600160a060020a039081169116146093576000565b6000805473ffffffffffffffffffffffffffffffffffffffff1916600160a060020a0383161790555b5b505600a165627a7a723058209111570c226431732439eb0bc63ee1be82fd4e90c525a97a44874c98cf7637e20029', gasEstimates: {"creation":[20215,47200],"external":{"kill()":321,"transferOwnership(address)":20418},"internal":{}}});
-Owned = new EmbarkJS.Contract({abi: [{"constant":false,"inputs":[{"name":"newOwner","type":"address"}],"name":"transferOwnership","outputs":[],"payable":false,"type":"function"},{"inputs":[],"payable":false,"type":"constructor"}], address: '0x9f186da5e3b40f70730e3befe780b31ed92bcd61', code: '606060405234610000575b60008054600160a060020a03191633600160a060020a03161790555b5b60ac806100356000396000f300606060405263ffffffff60e060020a600035041663f2fde38b81146022575b6000565b346000576038600160a060020a0360043516603a565b005b60005433600160a060020a039081169116146053576000565b6000805473ffffffffffffffffffffffffffffffffffffffff1916600160a060020a0383161790555b5b505600a165627a7a7230582061f1a15da7bc8dfccc027b91b0e74eab5cb2997b15d9716a1cbfcc71d61695040029', gasEstimates: {"creation":[20218,34400],"external":{"transferOwnership(address)":20396},"internal":{}}});
+Loan = new EmbarkJS.Contract({abi: [{"constant":false,"inputs":[{"name":"_rpy","type":"uint256"}],"name":"setRpy","outputs":[],"payable":false,"type":"function"},{"constant":true,"inputs":[],"name":"amt","outputs":[{"name":"","type":"uint256"}],"payable":false,"type":"function"},{"constant":false,"inputs":[],"name":"kill","outputs":[],"payable":false,"type":"function"},{"constant":true,"inputs":[],"name":"rpy","outputs":[{"name":"","type":"uint256"}],"payable":false,"type":"function"},{"constant":false,"inputs":[{"name":"_amt","type":"uint256"}],"name":"setAmt","outputs":[],"payable":false,"type":"function"},{"constant":false,"inputs":[],"name":"sendToBorrower","outputs":[{"name":"","type":"bool"}],"payable":false,"type":"function"},{"constant":false,"inputs":[{"name":"newOwner","type":"address"}],"name":"transferOwnership","outputs":[],"payable":false,"type":"function"},{"inputs":[{"name":"_amt","type":"uint256"},{"name":"_rpy","type":"uint256"}],"payable":true,"type":"constructor"},{"payable":true,"type":"fallback"}], address: '0xf3bcb2b3a621c55e98179d4ccd4bcc1f31995262', code: '60606040818152806102628339810160405280516020909101515b5b60008054600160a060020a03191633600160a060020a03161790555b600182905560028190555b50505b61020e806100546000396000f300606060405236156100675763ffffffff60e060020a6000350416630b39d771811461007057806316eab96b1461008257806341c0e1b5146100a1578063717d6bc2146100b0578063d8fbd5a0146100cf578063e5872068146100e1578063f2fde38b14610102575b61006e5b5b565b005b346100005761006e60043561011d565b005b346100005761008f610126565b60408051918252519081900360200190f35b346100005761006e61012c565b005b346100005761008f610158565b60408051918252519081900360200190f35b346100005761006e60043561015e565b005b34610000576100ee610167565b604080519115158252519081900360200190f35b346100005761006e600160a060020a036004351661019a565b005b60028190555b50565b60015481565b60005433600160a060020a0390811691161461014757610000565b600054600160a060020a0316ff5b5b565b60025481565b60018190555b50565b6040516000903390600160a060020a0380831691309091163180156108fc029185818181858888f19550505050505b5090565b60005433600160a060020a039081169116146101b557610000565b6000805473ffffffffffffffffffffffffffffffffffffffff1916600160a060020a0383161790555b5b505600a165627a7a723058204574a31b12ffa24d7835e4942cc6d5932126c5ac80de1bb44b53ca3a5983fb6e0029', gasEstimates: {"creation":[60350,105200],"external":{"":248,"amt()":264,"kill()":383,"rpy()":308,"sendToBorrower()":null,"setAmt(uint256)":20247,"setRpy(uint256)":20159,"transferOwnership(address)":20546},"internal":{"()":10}}});
+LoanDB = new EmbarkJS.Contract({abi: [{"constant":true,"inputs":[{"name":"index","type":"uint256"}],"name":"getLn","outputs":[{"name":"","type":"address"}],"payable":false,"type":"function"},{"constant":false,"inputs":[{"name":"index","type":"uint256"}],"name":"setLoan","outputs":[],"payable":false,"type":"function"},{"constant":false,"inputs":[],"name":"mkLns","outputs":[],"payable":false,"type":"function"},{"constant":true,"inputs":[],"name":"getLen","outputs":[{"name":"","type":"uint256"}],"payable":false,"type":"function"},{"constant":false,"inputs":[{"name":"loan","type":"address"}],"name":"addLoan","outputs":[],"payable":false,"type":"function"},{"constant":true,"inputs":[{"name":"n","type":"uint256"}],"name":"getLoan","outputs":[{"name":"loan","type":"address"}],"payable":false,"type":"function"},{"constant":true,"inputs":[{"name":"index","type":"uint256"}],"name":"getLnAmt","outputs":[{"name":"","type":"uint256"}],"payable":false,"type":"function"},{"constant":false,"inputs":[{"name":"n","type":"uint256"}],"name":"rmLoan","outputs":[],"payable":false,"type":"function"},{"inputs":[],"payable":false,"type":"constructor"},{"anonymous":false,"inputs":[{"indexed":false,"name":"str","type":"string"}],"name":"Debug","type":"event"}], address: '0xcc8430cf041e26ccae59b6763c4b0b600cf0e524', code: '606060405234610000575b5b5b61049f8061001b6000396000f300606060405236156100725763ffffffff60e060020a600035041663047f1d798114610077578063126d0854146100a35780634435c3aa146100b55780634a90be57146100c45780634e38e3a2146100e3578063504006ca146100fe578063d46f6cc41461012a578063f324f7571461014c575b610000565b346100005761008760043561015e565b60408051600160a060020a039092168252519081900360200190f35b34610000576100b3600435610194565b005b34610000576100b3610198565b005b34610000576100d161019b565b60408051918252519081900360200190f35b34610000576100b3600160a060020a03600435166101a2565b005b3461000057610087600435610219565b60408051600160a060020a039092168252519081900360200190f35b34610000576100d160043561024f565b60408051918252519081900360200190f35b34610000576100b36004356102d8565b005b6000600182815481101561000057906000526020600020900160005b9054906101000a9004600160a060020a031690505b919050565b5b50565b5b565b6000545b90565b600080548060010182818154818355818115116101e4576000838152602090206101e49181019083015b808211156101e057600081556001016101cc565b5090565b5b505050916000526020600020900160005b8154600160a060020a038086166101009390930a92830292021916179055505b50565b6000600082815481101561000057906000526020600020900160005b9054906101000a9004600160a060020a031690505b919050565b6000600182815481101561000057906000526020600020900160005b9054906101000a9004600160a060020a0316600160a060020a03166316eab96b6000604051602001526040518163ffffffff1660e060020a028152600401809050602060405180830381600087803b156100005760325a03f115610000575050604051519150505b919050565b600080541115806102ea575060005481115b156102f457610194565b600054600114156103825780151561037d57600081815481101561000057906000526020600020900160005b6101000a815490600160a060020a0302191690556000805480919060019003815481835581811511610377576000838152602090206103779181019083015b808211156101e057600081556001016101cc565b5090565b5b505050505b610194565b6000805460001981019081101561000057906000526020600020900160005b9054906101000a9004600160a060020a0316600082815481101561000057906000526020600020900160005b6101000a815481600160a060020a030219169083600160a060020a031602179055506000600160008054905003815481101561000057906000526020600020900160005b6101000a815490600160a060020a0302191690556000805480919060019003815481835581811511610468576000838152602090206104689181019083015b808211156101e057600081556001016101cc565b5090565b5b505050505b5b5b505600a165627a7a7230582006733f461a681a2824c13df44061332852b6609b7c8d4075fffebdb8cd0e488d0029', gasEstimates: {"creation":[269,236600],"external":{"addLoan(address)":null,"getLen()":309,"getLn(uint256)":501,"getLnAmt(uint256)":null,"getLoan(uint256)":611,"mkLns()":186,"rmLoan(uint256)":66766,"setLoan(uint256)":172},"internal":{}}});
+Mortal = new EmbarkJS.Contract({abi: [{"constant":false,"inputs":[],"name":"kill","outputs":[],"payable":false,"type":"function"},{"constant":false,"inputs":[{"name":"newOwner","type":"address"}],"name":"transferOwnership","outputs":[],"payable":false,"type":"function"}], address: '0x5c1678074981d9aa689591a4eb48b0d35dbe66ac', code: '60606040525b60008054600160a060020a03191633600160a060020a03161790555b5b60ec806100306000396000f300606060405263ffffffff60e060020a60003504166341c0e1b58114602c578063f2fde38b146038575b6000565b3460005760366050565b005b346000576036600160a060020a0360043516607a565b005b60005433600160a060020a039081169116146069576000565b600054600160a060020a0316ff5b5b565b60005433600160a060020a039081169116146093576000565b6000805473ffffffffffffffffffffffffffffffffffffffff1916600160a060020a0383161790555b5b505600a165627a7a72305820559428c0a4aacb79f728b0bc896dd5266ddc78617014116ca8ebc0bada2680180029', gasEstimates: {"creation":[20215,47200],"external":{"kill()":321,"transferOwnership(address)":20418},"internal":{}}});
+Owned = new EmbarkJS.Contract({abi: [{"constant":false,"inputs":[{"name":"newOwner","type":"address"}],"name":"transferOwnership","outputs":[],"payable":false,"type":"function"},{"inputs":[],"payable":false,"type":"constructor"}], address: '0x12dbe75c52fcb096ebcf74fc6a51c1cdd62c5698', code: '606060405234610000575b60008054600160a060020a03191633600160a060020a03161790555b5b60ac806100356000396000f300606060405263ffffffff60e060020a600035041663f2fde38b81146022575b6000565b346000576038600160a060020a0360043516603a565b005b60005433600160a060020a039081169116146053576000565b6000805473ffffffffffffffffffffffffffffffffffffffff1916600160a060020a0383161790555b5b505600a165627a7a72305820d50241ac086b0afe509aeb7e182817f87a742b5bb33c17968c3db7d2fd93d03d0029', gasEstimates: {"creation":[20218,34400],"external":{"transferOwnership(address)":20396},"internal":{}}});
 
 EmbarkJS.Storage.setProvider('ipfs', {server: 'localhost', port: '5001'});
 
@@ -78479,9 +78479,23 @@ $(document).ready(function() {
 	var addrReg; //23.03 marked for deletion
 	var loans = []; //24.03 marked for deletion - promises wont let me store loans in a JS variable
 
+	//02.04
+	curAcct = web3.eth.defaultAccount;
+	$('#intro .main-acct .result').html(curAcct);
+
 	//23.03
 	//var dbAd = LoanDB.address;
 	//dbAd unnecessary as var dbAddr created in index html
+
+	//02.04
+	//set current user account
+	$('#intro .main-acct button').click(function() {
+	  curAcct = $('#intro .main-acct .newAddr').val();
+		if (curAcct === "") {
+			curAcct = web3.eth.defaultAccount;
+		}
+		$('#intro .main-acct .result').html(curAcct);
+	});
 
   //.accts
   $('#intro .accts button').click(function() {
@@ -78497,31 +78511,78 @@ $(document).ready(function() {
   	});
   });
 
+  //02.04
+  //add default account setters and getters
+
+
   //26.03
   //tx from one address to another test
   //surprise: it works
   //for main accounts only
   // can't fund contracts
   //see below for attempt to fund contracts
+
+  //02.04 experimentation
+  //not yet integrated with curAcct
   $('#intro .tx button').click(function() {
   	var amt = web3.toWei($('#intro .tx .amt').val());
   	var tgt = $('#intro .tx .tgt').val();
-  	web3.eth.sendTransaction({to: tgt, value: amt}, function(err, result) {
-  		$('#intro .tx .result').html('sent ' + web3.fromWei(amt, 'ether') + ' to ' + tgt);
+  	var frm = $('#intro .tx .frm').val();
+  	//uses accounts[0] if frm is undefined
+  	if (frm === "") {
+  		alert('hello');
+  		var accts = web3.eth.accounts;
+  		frm = accts[0];
+  	}
+  	web3.eth.sendTransaction({from: frm, to: tgt, value: amt}, function(err, result) {
+  		$('#intro .tx .result').html('sent: ' + web3.fromWei(amt, 'ether') + ' ether<br />from ' + frm + ' <br />tgt ' + tgt);
   	});
+  });
+
+  //02.04
+  //integrated with curAcct
+  $('#intro .send-brw button').click(function() {
+  	var loan = $('#intro .send-brw .loan').val();
+  	var tgt = $('#intro .send-brw .tgt').val();
+
+  	if (tgt === "") {
+  		tgt = curAcct;
+  	}
+
+ 	  curLoan = new EmbarkJS.Contract({
+			abi: Loan.abi,
+			address: loan
+		});
+
+		var balance = web3.fromWei(web3.eth.getBalance(loan), 'ether');
+
+		//first attempt
+		//cahnged tgt to curAcct
+ 	  curLoan.sendToBorrower({from: tgt}).then(function(success) {
+ 	  	if (success) {
+ 	  		$('#intro .send-brw .result').html('' + balance + ' ether sent<br /> to account: ' + tgt + '<br />from Loan: ' + loan);
+
+ 	  		//$('#intro .send-brw .result').html('Loan ' + loan + ' sent ' + balance + ' to ' + tgt);
+ 	  	}
+ 	  	else {
+ 	  		$('#intro .send-brw .result').html('Something went wrong');
+ 	  	}
+ 	  });
   });
 
   //26.03
   //fund contracts
   //it turns out that this wasnt working because of i had .button instead of button
   //stupid
-  $('#intro .fund button').click(function() {
+  
+/*  $('#intro .fund button').click(function() {
   	var amt = web3.toWei($('#intro .fund .amt').val());
   	var tgt = $('#intro .fund .tgt').val();
 		web3.eth.sendTransaction({to: tgt, value: amt}, function(err, result) {
 			alert('is it working?');
 		});
-  });
+  });*/
+
 
   //.loandb
 	//show LoanDB address
@@ -78529,14 +78590,14 @@ $(document).ready(function() {
 
 
 	$('#intro .loandb .len button').click(function() {
-		LoanDB.getLen().then(function(len) {
+		LoanDB.getLen({from:curAcct}).then(function(len) {
 			$('#intro .loandb .len .result').html('Length: ' + len);
 		});
 	});
 
 	//marked for deletion 26.03
 	$('#intro .loandb .ls_ button').click(function() {
-		LoanDB.getLen().then(function(len) {
+		LoanDB.getLen({from:curAcct}).then(function(len) {
 			$('#intro .loandb .ls .result').html('');
 			if (len == 0) {
 				$('#intro .loandb .ls .result').html('No Loans found');
@@ -78544,7 +78605,7 @@ $(document).ready(function() {
 			else {
 				for (var i = 0; i < len; i++) {
 					(function (i) {
-						LoanDB.getLoan(i).then(function(addr) {
+						LoanDB.getLoan(i, {from:curAcct}).then(function(addr) {
 							$('#intro .loandb .ls .result').append('<br>' + i + ': ' + addr);
 							//23.03 i am running into issues because of how promises work
 //							loans[i] = addr;
@@ -78577,7 +78638,7 @@ $(document).ready(function() {
 	//or not required at all. should just be web3.eth.getBalance()
 	$('#intro .loandb .ls button').click(function() {
 		//first get the array length
-		LoanDB.getLen().then(function(len) {
+		LoanDB.getLen({from:curAcct}).then(function(len) {
 			$('#intro .loandb .ls .result').html('');
 			if (len == 0 ) {
 				$('#intro .loandb .ls .result').html('No Loans found');
@@ -78585,7 +78646,7 @@ $(document).ready(function() {
 			else {
 				for (var i = 0; i < len; i++) {
 					(function (i) {
-						LoanDB.getLoan(i).then(function(addr) {
+						LoanDB.getLoan(i, {from:curAcct}).then(function(addr) {
 							//$('#intro .loandb .ls .result').append('<br>' + i + ': ' + addr);
 							curLoan = new EmbarkJS.Contract({
 								abi: Loan.abi,
@@ -78667,14 +78728,14 @@ $(document).ready(function() {
 
 		//26.03
 		//added Loan.deploy([args],{txOptions})
-		Loan.deploy([amt, rpy], {value: amt}).then(function(deployedLoan) {
+		Loan.deploy([amt, rpy], {from: curAcct, value: amt}).then(function(deployedLoan) {
 			curLoan = deployedLoan;
 			$('#intro .loandb .add .result').append('<br>Loan deployed: ' + deployedLoan.address + '(' + web3.fromWei(amt,'ether') + ',' +' ' + rpy +')');
 
-			ldb.addLoan(deployedLoan.address).then(function() {
+			ldb.addLoan(deployedLoan.address, {from: curAcct}).then(function() {
 				$('#intro .loandb .add .result').append(' added to db');
 
-				web3.eth.sendTransaction({to: deployedLoan.address, value: amt});
+				web3.eth.sendTransaction({from: curAcct, to: deployedLoan.address, value: amt});
 
 /*				web3.eth.getCoinbase(function(err, addr) {
 					$('#intro .loandb .add .result').append('<br> from addr: ' + addr);
@@ -78703,14 +78764,14 @@ $(document).ready(function() {
 	$('#intro .loandb .rm button').click(function() {
 		var index = $('#intro .loandb .rm input').val();
 
-		LoanDB.getLoan(index).then(function(addr) {
+		LoanDB.getLoan(index, {from:curAcct}).then(function(addr) {
 			curLoan = new EmbarkJS.Contract({
 				abi: Loan.abi,
 				address: addr
 			});
-			curLoan.kill().then(function() {
+			curLoan.kill({from:curAcct}).then(function() {
 				var rmAddr = addr.toString();
-				LoanDB.rmLoan(index).then(function() {
+				LoanDB.rmLoan(index, {from:curAcct}).then(function() {
 					$('#intro .loandb .rm .result').html('removed loan: ' + rmAddr);
 				});
 			});
@@ -78733,7 +78794,7 @@ $(document).ready(function() {
 	//23.03 better termed as set current loan
 	$('#intro .loandb .inspect button').click(function() {
 		var index = $('#intro .loandb .inspect input').val();
-		LoanDB.getLoan(index).then(function(addr) {
+		LoanDB.getLoan(index, {from: curAcct}).then(function(addr) {
 			curLoanIndex = index;
 			curLoan= new EmbarkJS.Contract({
   	    abi: Loan.abi,
@@ -78753,14 +78814,14 @@ $(document).ready(function() {
 
   //handlers for the modded loandb
   $('#sand .dbmod .mk button').click(function() {
-  	LoanDB.mkLns().then(function() {
+  	LoanDB.mkLns({from:curAcct}).then(function() {
   		$('#sand .dbmod .mk result').html('added loans');
   	});
   });
 
   $('#sand .dbmod .get-amt button').click(function() {
   	var index = ('#sand .dbmod .get-amt input').val();
-  	ldb.getLnAmt(index).then(function(amt) {
+  	ldb.getLnAmt(index, {from:curAcct}).then(function(amt) {
   		$('#sand .dbmod .get-amt .result').html(amt);
   	});
   });
