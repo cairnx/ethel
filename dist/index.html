@@ -1,6 +1,7 @@
+<!DOCTYPE html>
 <html>
   <head>
-    <title>ethl - Ethereum Blockchain P2P Lending</title>
+    <title>Ethl - p2p lending dapp</title>
     <link rel="stylesheet" href="css/app.css">
     <script src="js/app.js"></script>
     <script type="text/javascript">
@@ -15,27 +16,30 @@
     	});
 
     	var curAcct;
-
     	//marked for deletion
     	//var cb = web3.eth.coinbase;
     	//alert(cb);
     	//alert(web3.eth.coinbase);
-    </script>
+
+    </script>    
   </head>
   <body class="container">
-    <h3>Welcome to ethl!</h3>
-    <p>Under development</p>
-    <p>Built using the Embark framework. See the <a href="https://github.com/iurimatias/embark-framework/wiki">Wiki</a> to see what you can do with Embark!</p>
 
-    <ul class='nav nav-tabs'>
-      <li class='active'><a data-toggle='tab' href='#intro'>Work area</a></li>
-      <li><a data-toggle='tab' href='#sand'>Temp</a></li>
-      <li><a data-toggle='tab' href='#worklog'>Work log</a></li>
-    </ul>
+    <h3>ethl - ethereum p2p lending dapp</h3>
+    <p>Under development<br />
+      <a href="https://github.com/cairnx/ethl">https://github.com/cairnx/ethl</a>
+    </p>
+    <p>Built using the Embark framework. See the <a href="https://github.com/iurimatias/embark-framework/wiki">Wiki</a> to see what you can do with Embark!</p>  
 
-    <div class='tab-content'>
-      <div id='intro' class='tab-pane active'>
-        <h3>The Basic Components</h3>
+		<ul id="tabs-menu-box" class="nav nav-tabs">
+		  <li class="active"><a href="#intro" class="intro">Work area</a></li>
+		  <li><a href="#sand" class="sand">Temp</a></li>
+		  <li><a href="#worklog" class="worklog">Work log</a></li>
+		</ul>
+
+		<div class="tab-content">
+		  <div class="tab-pane active" id="intro">
+		   	<h3>The Basic Components</h3>
 
         <ul>
           <li>LoanDB - holds an array Loan addresses</li>
@@ -87,7 +91,7 @@
       		<button>Send</button>
       		<div class="result"></div>
         </div>
-
+      
 
 <!-- 02.04
         <div class="form-group fund">
@@ -173,54 +177,13 @@
             <div class="result"></div>
           </div>
 
-        </div>
-
-        <!-- 02.04 marked for deletion -->
-      	<!--<h3>Loan</h3>-->
-
-      </div>
-
-      <div id='sand' class='tab-pane'>
-        <h3>Sandbox testing area</h3>
-        <p>This area is used for testing during implementation</p>
-        <p>It can also serve as a log for the development process</p>
-
-        <h3>23 March</h3>
-
-        <div class="form-group dbmod">
-          <h4>Modified Loan DB</h4>
-          <p>Previous LoanDB stored an array of addresses, not an array of Loans. In other words the LoanDB and Loan contracts didn't actually talk to each other. Due to difficulties in retrieving state, I am looking to re-design the LoanDB contract to store an array of Loans. I am concerned that it might become difficult to retreive state this way</p>
-
-          <p>I am going to make one more attempt at retrieving Loan state entirely through jQuery manipulation of the LoanDB address array</p>
-
-          <p>The issue relates to promises and the scope of the returned variables</p>
-
-          <div class="mk">
-            <h4>Make Loans for modded DB</h4>
-            <button>make loans</button>
-            <div class="result"></div>
-          </div>
-
-          <div class="get">
-          	<h4>Get Loan from modded DB</h4>
-          	<input placeholder="enter index" />
-          	<button>get</button>
-          	<div class="result"></div>
-          </div>
-
-          <div class="get-amt">
-            <h4>Get amount of loan at index</h4>
-            <input placeholder ="enter index" />
-            <button>get</button>
-            <div class="result"></div>
-          </div>
-        	
-        </div>
-       
-      </div>
-
-      <div id='worklog' class='tab-pane'>
-        <h3>Development Worklog</h3>
+        </div>	
+		  </div>
+		  <div class="tab-pane" id="sand">
+		   	
+		  </div>
+		  <div class="tab-pane" id="worklog">
+		   	<h3>Development Worklog</h3>
         <h4>02.04</h4>
         <p><b>Notes</b></p>
         <p>
@@ -258,11 +221,35 @@
         	Credit ratings in LoanDB<br />
         </p>
 
+        <h4>05.04</h4>
+        <p><b>Notes</b></p>
+        <p>
+        	Fixed bootstrap tab issue<br />
+        	Completed poster pres and demo<br />
+        </p>
+
         <h3>Documented Experiments</h3>
        	<ul>
        		<li>Experiment 1 - 02.04</li>
         </ul>
       </div>
-    </div>
+		  </div>
+		</div>
+
+		<script>
+			$(".nav a").on("click", function(){
+
+				//alert(tgt);
+			  $(".nav").find(".active").removeClass("active");
+			  $(this).parent().addClass("active");
+				var tgt = $(".nav").find(".active a").attr("class");			  
+			  $(".tab-content").find(".active").removeClass("active");
+			  var tgt = '#' + tgt;
+			  //alert(tgt);
+			  //alert($(".tab-content").find(tgt).toString());
+			  $(".tab-content").find(tgt).addClass("active");
+			});
+		</script>
+
   </body>
 </html>
