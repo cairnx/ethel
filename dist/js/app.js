@@ -78670,7 +78670,7 @@ $(document).ready(function() {
 	});
 
 	//05.04
-	//all loans
+	//ls all loans
   $('#intro .loandb .ls button.all').click(function() {
 		//first get the array length
 		LoanDB.getLen({from:curAcct}).then(function(len) {
@@ -78708,6 +78708,56 @@ $(document).ready(function() {
 	});
 
 	//05.04
+	//ls promise test
+  $('#intro .loandb .ls button.test').click(function() {
+		//first get the array length
+		LoanDB.getLen({from:curAcct}).then(function(len) {
+			$('#intro .loandb .ls .result').html('');
+			if (len == 0 ) {
+				$('#intro .loandb .ls .result').html('No Loans found');
+			}
+			else {
+				for (var i = 0; i < len; i++) {
+					(function (i) {
+						LoanDB.getLoan(i, {from:curAcct}).then(function(addr) {
+							//$('#intro .loandb .ls .result').append('<br>' + i + ': ' + addr);
+							curLoan = new EmbarkJS.Contract({
+								abi: Loan.abi,
+								address: addr
+							});
+
+							Promise.all([
+								  curLoan.amt().then(function(amt) {return amt}),
+								  curLoan.rpy().then(function(rpy) {return rpy}),
+								  curLoan.taken().then(function(tkn) {
+								  	if (tkn) return "Taken";
+								  	else return "Available";
+								  })
+								]).then(function(values) {
+									$('#intro .loandb .ls .result').append('' + i + ': ' +values[0] + ' ' + values[1] + ' ' + values[2] +'<br />');
+								});
+
+/*							curLoan.amt().then(function(amt) {
+								amt = web3.fromWei(amt, 'ether');
+								curLoan.rpy().then(function(rpy) {
+								  $('#intro .loandb .ls .result').append('<br> '+ i + ': ' + addr + ': ' + amt + ', ' + rpy);
+								});
+							});*/
+
+/*							curLoan.rpy().then(function(rpy) {
+						    var amt = web3.fromWei(web3.eth.getBalance(addr), 'ether');
+						    $('#intro .loandb .ls .result').append('<br> ' +  i + ': ' + addr + ': ' +
+						    amt + ', ' + rpy);
+					    });*/
+						});
+					})(i);
+				}
+			}
+		});
+	});	
+
+	//05.04
+	//take loan - add borrower addr to loan | set taken to true | transfer ether to borrower
 	$('#intro .loandb .take-ln button').click(function() {
 		var index = $('#intro .loandb .take-ln input').val();
 		//alert(index);
@@ -78736,32 +78786,6 @@ $(document).ready(function() {
 					$('#intro .loandb .take-ln .result').html('Loan at index <code>'+ index +'</code> already taken');
 				}
 			});
-
-/*			curLoan.setBorrower({from: curAcct}).then(function(brw) {
-				curLoan.taken().then(function(tkn) {
-					if (tkn) {
-						$('#intro .loandb .take-ln .result').html('Loan already taken');
-					}
-					else {
-						alert("HELLO");
-						curLoan.amt().then(function(amt) {
-							$('#intro .loandb .take-ln .result').html('Loan: ' + addr +
-								'<br />amt: ' + amt +
-								'<br />borrower: ' + brw);
-						});
-					}
-				});
-			});*/
-/*			curLoan.taken().then(function(tkn) {
-				if (!tkn) {
-					curLoan.setBorrower({from: curAcct}).then(function(brw){
-						alert("loan not taken. set borrower");
-					});
-				}
-				else {
-					alert("already taken, do nothing");
-				}
-			});*/
 		});
 	});
 
@@ -78861,7 +78885,7 @@ $(document).ready(function() {
 
 		//26.03
 		//added Loan.deploy([args],{txOptions})
-		Loan.deploy([amt, rpy], {from: curAcct, value: amt}).then(function(deployedLoan) {
+		Loan.deploy([web3.fromWei(amt,'ether'), rpy], {from: curAcct, value: amt}).then(function(deployedLoan) {
 			curLoan = deployedLoan;
 			$('#intro .loandb .add .result').append('<br>Loan deployed: ' + deployedLoan.address + '(' + web3.fromWei(amt,'ether') + ',' +' ' + rpy +')');
 
