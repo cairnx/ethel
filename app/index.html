@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
   <head>
-    <title>Ethl - thereum Blockchain P2P Lending Dapp</title>
+    <title>Ethl - Ethereum Blockchain P2P Lending Dapp</title>
     <link rel="stylesheet" href="css/app.css">
     <script src="js/app.js"></script>
     <script type="text/javascript">
@@ -72,7 +72,7 @@
         <div class="form-group tx">
         	<h3>Transfer ether</h3>
         	<p>Transfers ether from one account to another<br />
-        	ether is sent from curAcct</p>
+        	ether is sent from <a href="#cur-acct">curAcct</a></p>
         	<input class="tgt" placeholder="target address" />
         	<input class="amt" placeholder="amt in ether" />
         	<button>Transfer</button>
@@ -118,18 +118,45 @@
             <div class="result"></div>
           </div>
 
-          <!-- sol and js required -->
+          <!--
           <div class="form-group len">
             <h4>LoanDB Length</h4>
             <p>The number of entries in LoanDB</p>
             <button>Get # of loans</button>
             <div class="result"></div>
           </div>
+          -->
 
           <div class="form-group ls">
             <h4>List Loans</h4>
             <p>List the addresses of the loans in LoanDB. Should also retrieve all of the relevant info for users e.g. amount, amt repayable, days to repay etc</p>
-            <button>List loans</button>
+            <button class="available">Available</button>
+            <button class="all">All</button>
+            <div class="result"></div>
+          </div>
+
+          <div class="form-group take-ln">
+            <h4>Take Loan</h4>
+            <p>Take loan at index <code>n</code><br />
+              Sets <code>borrower</code> to <code><a href="#cur-acct">curAcct</a></code></p>
+            <input placeholder="enter loan index" />
+            <button>Take loan</button>
+            <div class="result"></div>
+          </div>
+
+          <div class="form-group get-br">
+            <h4>Get Borrower</h4>
+            <p>Get <code>address borrower</code> for loan at index <code>n</code></p>
+            <input placeholder="enter loan index" />
+            <button>Get borrower</button>
+            <div class="result"></div>
+          </div>
+
+          <div class="form-group get-taken">
+            <h4>Get Taken</h4>
+            <p>Enter loan index to get <code>bool taken</code></p>
+            <input placeholder="enter loan index" />
+            <button>Get taken</button>
             <div class="result"></div>
           </div>
 
@@ -180,7 +207,7 @@
         </div>	
 		  </div>
 		  <div class="tab-pane" id="sand">
-		   	
+		   	<h3>Nothing to see here</h3>
 		  </div>
 		  <div class="tab-pane" id="worklog">
 		   	<h3>Development Worklog</h3>
@@ -228,15 +255,31 @@
         	Completed poster pres and demo<br />
         </p>
 
+        <p><b>End of session</b></p>
+        <p>
+        	Borrowers can take available loans<br />
+        	Loan funds are automatically transferred to the borrower
+        </p>
+
+        <p><b>Next steps</b></p>
+        <p>
+          Repayment functionality<br />
+          Maturity dates<br />
+          Credit ratings
+        </p>
+
         <h3>Documented Experiments</h3>
        	<ul>
        		<li>Experiment 1 - 02.04</li>
+       		<li>Experiment 2 - 05.04
         </ul>
       </div>
 		  </div>
 		</div>
 
 		<script>
+		//tab management script
+		//05.04
 			$(".nav a").on("click", function(){
 
 				//alert(tgt);

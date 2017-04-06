@@ -7,7 +7,7 @@ $(document).ready(function() {
 
 	//02.04
 	curAcct = web3.eth.defaultAccount;
-	$('#intro .main-acct .result').html(curAcct);
+	$('#intro .cur-acct .result').html(curAcct);
 
 	//23.03
 	//var dbAd = LoanDB.address;
@@ -20,7 +20,7 @@ $(document).ready(function() {
 		if (curAcct === "") {
 			curAcct = web3.eth.defaultAccount;
 		}
-		$('#intro .cur-acct .result').html(curAcct);
+		$('#intro .cur-acct .result').html('current: ' + curAcct);
 	});
 
   //.accts
@@ -149,19 +149,55 @@ $(document).ready(function() {
 		});
 	});
 
-	//23.03
-	//retrying the display loan content bit
-	//24.03
-	//added repay amount get
-	//26.03
-	//need to rework loans so that
-	//amount is = to balance of new loan
-	//i.e. set amount not necessary
-	//make Loan payable
-	//fund loan
-	//amt() should return balance
-	//or not required at all. should just be web3.eth.getBalance()
-	$('#intro .loandb .ls button').click(function() {
+	//05.04
+	$('#intro .loandb .ls button.available').click(function() {
+		//first get the array length
+		LoanDB.getLen({from:curAcct}).then(function(len) {
+			$('#intro .loandb .ls .result').html('');
+			if (len == 0 ) {
+				$('#intro .loandb .ls .result').html('No loans found');
+			}
+			else {
+				for (var i = 0; i < len; i++) {
+					(function (i) {
+						LoanDB.getLoan(i, {from:curAcct}).then(function(addr) {
+							//$('#intro .loandb .ls .result').append('<br>' + i + ': ' + addr);
+							curLoan = new EmbarkJS.Contract({
+								abi: Loan.abi,
+								address: addr
+							});
+
+/*							curLoan.amt().then(function(amt) {
+								amt = web3.fromWei(amt, 'ether');
+								curLoan.rpy().then(function(rpy) {
+								  $('#intro .loandb .ls .result').append('<br> '+ i + ': ' + addr + ': ' + amt + ', ' + rpy);
+								});
+							});*/
+
+							curLoan.taken().then(function(tkn){
+								if (!tkn) {
+									curLoan.rpy().then(function(rpy) {
+								    var amt = web3.fromWei(web3.eth.getBalance(addr), 'ether');
+  							    $('#intro .loandb .ls .result').append('<br> ' +  i + ': ' + addr + ': ' +
+								    amt + ', ' + rpy);
+							    });
+								}
+							});
+						});
+					})(i);
+				}
+			}
+
+		});
+					var checkIfBlank = $('#intro .loandb .ls .result').text();
+			if (checkIfBlank.length == 0) {
+			  $('#intro .loandb .ls .result').html('No loans available');
+		  }
+	});
+
+	//05.04
+	//all loans
+  $('#intro .loandb .ls button.all').click(function() {
 		//first get the array length
 		LoanDB.getLen({from:curAcct}).then(function(len) {
 			$('#intro .loandb .ls .result').html('');
@@ -186,14 +222,112 @@ $(document).ready(function() {
 							});*/
 
 							curLoan.rpy().then(function(rpy) {
-								var amt = web3.fromWei(web3.eth.getBalance(addr), 'ether');
-								$('#intro .loandb .ls .result').append('<br> ' +  i + ': ' + addr + ': ' + amt + ', ' + rpy);
-							});
-
+						    var amt = web3.fromWei(web3.eth.getBalance(addr), 'ether');
+						    $('#intro .loandb .ls .result').append('<br> ' +  i + ': ' + addr + ': ' +
+						    amt + ', ' + rpy);
+					    });
 						});
 					})(i);
 				}
 			}
+		});
+	});
+
+	//05.04
+	$('#intro .loandb .take-ln button').click(function() {
+		var index = $('#intro .loandb .take-ln input').val();
+		//alert(index);
+		LoanDB.getLoan(index , {from: curAcct}).then(function(addr) {
+			curLoan = new EmbarkJS.Contract({
+				abi: Loan.abi,
+				address: addr
+			});
+
+			curLoan.taken().then(function(tkn) {
+				if(!tkn) {
+					curLoan.setBorrower({from: curAcct}).then(function(brw) {
+						curLoan.amt().then(function(amt) {
+							amt = web3.fromWei(amt, 'ether');
+							curLoan.rpy().then(function(rpy) {
+								//rpy = web3.fromWei(rpy, 'ether');
+							  $('#intro .loandb .take-ln .result').html('Loan: ' + addr +
+						    '<br />amt: ' + amt +
+						    '<br />rpy: ' + rpy +
+							  '<br />borrower: ' + curAcct);
+							});
+						});
+					});
+				}
+				else {
+					$('#intro .loandb .take-ln .result').html('Loan at index <code>'+ index +'</code> already taken');
+				}
+			});
+
+/*			curLoan.setBorrower({from: curAcct}).then(function(brw) {
+				curLoan.taken().then(function(tkn) {
+					if (tkn) {
+						$('#intro .loandb .take-ln .result').html('Loan already taken');
+					}
+					else {
+						alert("HELLO");
+						curLoan.amt().then(function(amt) {
+							$('#intro .loandb .take-ln .result').html('Loan: ' + addr +
+								'<br />amt: ' + amt +
+								'<br />borrower: ' + brw);
+						});
+					}
+				});
+			});*/
+/*			curLoan.taken().then(function(tkn) {
+				if (!tkn) {
+					curLoan.setBorrower({from: curAcct}).then(function(brw){
+						alert("loan not taken. set borrower");
+					});
+				}
+				else {
+					alert("already taken, do nothing");
+				}
+			});*/
+		});
+	});
+
+	//05.04
+	$('#intro .loandb .get-br button').click(function() {
+		var index = $('#intro .loandb .get-br input').val();
+		LoanDB.getLoan(index , {from: curAcct}).then(function(addr) {
+			curLoan = new EmbarkJS.Contract({
+				abi: Loan.abi,
+				address: addr
+			});
+			curLoan.borrower().then(function(br) {
+				var brAddr = br.toString();
+				alert(brAddr);
+			});
+		});
+	});
+
+
+
+  //05.04
+	$('#intro .loandb .get-taken button').click(function() {
+		var index = $('#intro .loandb .get-taken input').val();
+		//alert(index);
+		LoanDB.getLoan(index , {from: curAcct}).then(function(addr) {
+			curLoan = new EmbarkJS.Contract({
+				abi: Loan.abi,
+				address: addr
+			});
+			curLoan.taken().then(function(result) {
+				if (result) {
+					alert(result);
+				  $('#intro .loandb .tget-taken .result').html("Loan: " + addr + "<br />" +
+					  "borrower: " + curAcct);
+				}
+				else {
+					alert("false");
+					$('#intro .loandb .get-taken .result').html("Error: couldn't take loan");
+				}
+			});
 		});
 	});
 

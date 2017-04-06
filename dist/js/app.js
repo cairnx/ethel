@@ -78452,10 +78452,10 @@ if (typeof web3 !== 'undefined' && typeof Web3 !== 'undefined') {
 }
 web3.eth.defaultAccount = web3.eth.accounts[0];
 
-Loan = new EmbarkJS.Contract({abi: [{"constant":false,"inputs":[{"name":"_rpy","type":"uint256"}],"name":"setRpy","outputs":[],"payable":false,"type":"function"},{"constant":true,"inputs":[],"name":"amt","outputs":[{"name":"","type":"uint256"}],"payable":false,"type":"function"},{"constant":false,"inputs":[],"name":"kill","outputs":[],"payable":false,"type":"function"},{"constant":true,"inputs":[],"name":"rpy","outputs":[{"name":"","type":"uint256"}],"payable":false,"type":"function"},{"constant":false,"inputs":[{"name":"_amt","type":"uint256"}],"name":"setAmt","outputs":[],"payable":false,"type":"function"},{"constant":false,"inputs":[],"name":"sendToBorrower","outputs":[{"name":"","type":"bool"}],"payable":false,"type":"function"},{"constant":false,"inputs":[{"name":"newOwner","type":"address"}],"name":"transferOwnership","outputs":[],"payable":false,"type":"function"},{"inputs":[{"name":"_amt","type":"uint256"},{"name":"_rpy","type":"uint256"}],"payable":true,"type":"constructor"},{"payable":true,"type":"fallback"}], address: '0x75792c090e86acc7a21d8cd010f279327bc4b9ed', code: '60606040818152806102628339810160405280516020909101515b5b60008054600160a060020a03191633600160a060020a03161790555b600182905560028190555b50505b61020e806100546000396000f300606060405236156100675763ffffffff60e060020a6000350416630b39d771811461007057806316eab96b1461008257806341c0e1b5146100a1578063717d6bc2146100b0578063d8fbd5a0146100cf578063e5872068146100e1578063f2fde38b14610102575b61006e5b5b565b005b346100005761006e60043561011d565b005b346100005761008f610126565b60408051918252519081900360200190f35b346100005761006e61012c565b005b346100005761008f610158565b60408051918252519081900360200190f35b346100005761006e60043561015e565b005b34610000576100ee610167565b604080519115158252519081900360200190f35b346100005761006e600160a060020a036004351661019a565b005b60028190555b50565b60015481565b60005433600160a060020a0390811691161461014757610000565b600054600160a060020a0316ff5b5b565b60025481565b60018190555b50565b6040516000903390600160a060020a0380831691309091163180156108fc029185818181858888f19550505050505b5090565b60005433600160a060020a039081169116146101b557610000565b6000805473ffffffffffffffffffffffffffffffffffffffff1916600160a060020a0383161790555b5b505600a165627a7a723058204574a31b12ffa24d7835e4942cc6d5932126c5ac80de1bb44b53ca3a5983fb6e0029', gasEstimates: {"creation":[60350,105200],"external":{"":248,"amt()":264,"kill()":383,"rpy()":308,"sendToBorrower()":null,"setAmt(uint256)":20247,"setRpy(uint256)":20159,"transferOwnership(address)":20546},"internal":{"()":10}}});
-LoanDB = new EmbarkJS.Contract({abi: [{"constant":true,"inputs":[{"name":"index","type":"uint256"}],"name":"getLn","outputs":[{"name":"","type":"address"}],"payable":false,"type":"function"},{"constant":false,"inputs":[{"name":"index","type":"uint256"}],"name":"setLoan","outputs":[],"payable":false,"type":"function"},{"constant":false,"inputs":[],"name":"mkLns","outputs":[],"payable":false,"type":"function"},{"constant":true,"inputs":[],"name":"getLen","outputs":[{"name":"","type":"uint256"}],"payable":false,"type":"function"},{"constant":false,"inputs":[{"name":"loan","type":"address"}],"name":"addLoan","outputs":[],"payable":false,"type":"function"},{"constant":true,"inputs":[{"name":"n","type":"uint256"}],"name":"getLoan","outputs":[{"name":"loan","type":"address"}],"payable":false,"type":"function"},{"constant":true,"inputs":[{"name":"index","type":"uint256"}],"name":"getLnAmt","outputs":[{"name":"","type":"uint256"}],"payable":false,"type":"function"},{"constant":false,"inputs":[{"name":"n","type":"uint256"}],"name":"rmLoan","outputs":[],"payable":false,"type":"function"},{"inputs":[],"payable":false,"type":"constructor"},{"anonymous":false,"inputs":[{"indexed":false,"name":"str","type":"string"}],"name":"Debug","type":"event"}], address: '0xd51ce69fcb784806ca9bba38ef975dea126e2176', code: '606060405234610000575b5b5b61049f8061001b6000396000f300606060405236156100725763ffffffff60e060020a600035041663047f1d798114610077578063126d0854146100a35780634435c3aa146100b55780634a90be57146100c45780634e38e3a2146100e3578063504006ca146100fe578063d46f6cc41461012a578063f324f7571461014c575b610000565b346100005761008760043561015e565b60408051600160a060020a039092168252519081900360200190f35b34610000576100b3600435610194565b005b34610000576100b3610198565b005b34610000576100d161019b565b60408051918252519081900360200190f35b34610000576100b3600160a060020a03600435166101a2565b005b3461000057610087600435610219565b60408051600160a060020a039092168252519081900360200190f35b34610000576100d160043561024f565b60408051918252519081900360200190f35b34610000576100b36004356102d8565b005b6000600182815481101561000057906000526020600020900160005b9054906101000a9004600160a060020a031690505b919050565b5b50565b5b565b6000545b90565b600080548060010182818154818355818115116101e4576000838152602090206101e49181019083015b808211156101e057600081556001016101cc565b5090565b5b505050916000526020600020900160005b8154600160a060020a038086166101009390930a92830292021916179055505b50565b6000600082815481101561000057906000526020600020900160005b9054906101000a9004600160a060020a031690505b919050565b6000600182815481101561000057906000526020600020900160005b9054906101000a9004600160a060020a0316600160a060020a03166316eab96b6000604051602001526040518163ffffffff1660e060020a028152600401809050602060405180830381600087803b156100005760325a03f115610000575050604051519150505b919050565b600080541115806102ea575060005481115b156102f457610194565b600054600114156103825780151561037d57600081815481101561000057906000526020600020900160005b6101000a815490600160a060020a0302191690556000805480919060019003815481835581811511610377576000838152602090206103779181019083015b808211156101e057600081556001016101cc565b5090565b5b505050505b610194565b6000805460001981019081101561000057906000526020600020900160005b9054906101000a9004600160a060020a0316600082815481101561000057906000526020600020900160005b6101000a815481600160a060020a030219169083600160a060020a031602179055506000600160008054905003815481101561000057906000526020600020900160005b6101000a815490600160a060020a0302191690556000805480919060019003815481835581811511610468576000838152602090206104689181019083015b808211156101e057600081556001016101cc565b5090565b5b505050505b5b5b505600a165627a7a7230582006733f461a681a2824c13df44061332852b6609b7c8d4075fffebdb8cd0e488d0029', gasEstimates: {"creation":[269,236600],"external":{"addLoan(address)":null,"getLen()":309,"getLn(uint256)":501,"getLnAmt(uint256)":null,"getLoan(uint256)":611,"mkLns()":186,"rmLoan(uint256)":66766,"setLoan(uint256)":172},"internal":{}}});
-Mortal = new EmbarkJS.Contract({abi: [{"constant":false,"inputs":[],"name":"kill","outputs":[],"payable":false,"type":"function"},{"constant":false,"inputs":[{"name":"newOwner","type":"address"}],"name":"transferOwnership","outputs":[],"payable":false,"type":"function"}], address: '0xf113dd31d00755bd625c868d7fa101b6bfce6f67', code: '60606040525b60008054600160a060020a03191633600160a060020a03161790555b5b60ec806100306000396000f300606060405263ffffffff60e060020a60003504166341c0e1b58114602c578063f2fde38b146038575b6000565b3460005760366050565b005b346000576036600160a060020a0360043516607a565b005b60005433600160a060020a039081169116146069576000565b600054600160a060020a0316ff5b5b565b60005433600160a060020a039081169116146093576000565b6000805473ffffffffffffffffffffffffffffffffffffffff1916600160a060020a0383161790555b5b505600a165627a7a72305820559428c0a4aacb79f728b0bc896dd5266ddc78617014116ca8ebc0bada2680180029', gasEstimates: {"creation":[20215,47200],"external":{"kill()":321,"transferOwnership(address)":20418},"internal":{}}});
-Owned = new EmbarkJS.Contract({abi: [{"constant":false,"inputs":[{"name":"newOwner","type":"address"}],"name":"transferOwnership","outputs":[],"payable":false,"type":"function"},{"inputs":[],"payable":false,"type":"constructor"}], address: '0x500a8ea88ac9f3bd0165ffb7ab5e3e6afe113ac9', code: '606060405234610000575b60008054600160a060020a03191633600160a060020a03161790555b5b60ac806100356000396000f300606060405263ffffffff60e060020a600035041663f2fde38b81146022575b6000565b346000576038600160a060020a0360043516603a565b005b60005433600160a060020a039081169116146053576000565b6000805473ffffffffffffffffffffffffffffffffffffffff1916600160a060020a0383161790555b5b505600a165627a7a72305820d50241ac086b0afe509aeb7e182817f87a742b5bb33c17968c3db7d2fd93d03d0029', gasEstimates: {"creation":[20218,34400],"external":{"transferOwnership(address)":20396},"internal":{}}});
+Loan = new EmbarkJS.Contract({abi: [{"constant":false,"inputs":[{"name":"_rpy","type":"uint256"}],"name":"setRpy","outputs":[],"payable":false,"type":"function"},{"constant":true,"inputs":[],"name":"amt","outputs":[{"name":"","type":"uint256"}],"payable":false,"type":"function"},{"constant":false,"inputs":[],"name":"kill","outputs":[],"payable":false,"type":"function"},{"constant":true,"inputs":[],"name":"rpy","outputs":[{"name":"","type":"uint256"}],"payable":false,"type":"function"},{"constant":true,"inputs":[],"name":"borrower","outputs":[{"name":"","type":"address"}],"payable":false,"type":"function"},{"constant":true,"inputs":[],"name":"taken","outputs":[{"name":"","type":"bool"}],"payable":false,"type":"function"},{"constant":false,"inputs":[{"name":"_amt","type":"uint256"}],"name":"setAmt","outputs":[],"payable":false,"type":"function"},{"constant":false,"inputs":[],"name":"sendToBorrower","outputs":[{"name":"","type":"bool"}],"payable":false,"type":"function"},{"constant":false,"inputs":[],"name":"setBorrower","outputs":[{"name":"","type":"bool"}],"payable":false,"type":"function"},{"constant":false,"inputs":[{"name":"newOwner","type":"address"}],"name":"transferOwnership","outputs":[],"payable":false,"type":"function"},{"inputs":[{"name":"_amt","type":"uint256"},{"name":"_rpy","type":"uint256"}],"payable":true,"type":"constructor"},{"payable":true,"type":"fallback"}], address: '0xf5dea4c924e0b25f0fe227bc934cfde828194e2d', code: '60606040818152806103b18339810160405280516020909101515b5b60008054600160a060020a03191633600160a060020a03161790555b600182905560028190556003805460a060020a60ff02191690555b50505b61034d806100646000396000f300606060405236156100885763ffffffff60e060020a6000350416630b39d771811461009157806316eab96b146100a357806341c0e1b5146100c2578063717d6bc2146100d15780637df1f1b9146100f0578063b6761a6414610119578063d8fbd5a01461013a578063e58720681461014c578063e77c19411461016d578063f2fde38b1461018e575b61008f5b5b565b005b346100005761008f6004356101a9565b005b34610000576100b06101b2565b60408051918252519081900360200190f35b346100005761008f6101b8565b005b34610000576100b06101e4565b60408051918252519081900360200190f35b34610000576100fd6101ea565b60408051600160a060020a039092168252519081900360200190f35b34610000576101266101f9565b604080519115158252519081900360200190f35b346100005761008f600435610209565b005b3461000057610126610212565b604080519115158252519081900360200190f35b3461000057610126610245565b604080519115158252519081900360200190f35b346100005761008f600160a060020a03600435166102d9565b005b60028190555b50565b60015481565b60005433600160a060020a039081169116146101d357610000565b600054600160a060020a0316ff5b5b565b60025481565b600354600160a060020a031681565b60035460a060020a900460ff1681565b60018190555b50565b6040516000903390600160a060020a0380831691309091163180156108fc029185818181858888f19550505050505b5090565b60035460009060a060020a900460ff1615156102d1576003805474ff000000000000000000000000000000000000000019600160a060020a0333811673ffffffffffffffffffffffffffffffffffffffff19909316929092171660a060020a179182905560405191811691309091163180156108fc02916000818181858888f1935050505090506102d5565b5060005b5b90565b60005433600160a060020a039081169116146102f457610000565b6000805473ffffffffffffffffffffffffffffffffffffffff1916600160a060020a0383161790555b5b505600a165627a7a72305820551bc7d5dd809683c6f551c396aa899d7f30daf635e928bffbc19a75ab9cc2d30029', gasEstimates: {"creation":[80510,169000],"external":{"":314,"amt()":264,"borrower()":403,"kill()":383,"rpy()":308,"sendToBorrower()":null,"setAmt(uint256)":20291,"setBorrower()":null,"setRpy(uint256)":20159,"taken()":398,"transferOwnership(address)":20612},"internal":{"()":10}}});
+LoanDB = new EmbarkJS.Contract({abi: [{"constant":true,"inputs":[{"name":"index","type":"uint256"}],"name":"getLn","outputs":[{"name":"","type":"address"}],"payable":false,"type":"function"},{"constant":false,"inputs":[{"name":"index","type":"uint256"}],"name":"setLoan","outputs":[],"payable":false,"type":"function"},{"constant":false,"inputs":[],"name":"mkLns","outputs":[],"payable":false,"type":"function"},{"constant":true,"inputs":[],"name":"getLen","outputs":[{"name":"","type":"uint256"}],"payable":false,"type":"function"},{"constant":false,"inputs":[{"name":"loan","type":"address"}],"name":"addLoan","outputs":[],"payable":false,"type":"function"},{"constant":true,"inputs":[{"name":"n","type":"uint256"}],"name":"getLoan","outputs":[{"name":"loan","type":"address"}],"payable":false,"type":"function"},{"constant":true,"inputs":[{"name":"index","type":"uint256"}],"name":"getLnAmt","outputs":[{"name":"","type":"uint256"}],"payable":false,"type":"function"},{"constant":false,"inputs":[{"name":"n","type":"uint256"}],"name":"rmLoan","outputs":[],"payable":false,"type":"function"},{"inputs":[],"payable":false,"type":"constructor"},{"anonymous":false,"inputs":[{"indexed":false,"name":"str","type":"string"}],"name":"Debug","type":"event"}], address: '0x1863884fd9bfa8d8caf0486b19e92e7a41f82e75', code: '606060405234610000575b5b5b61049f8061001b6000396000f300606060405236156100725763ffffffff60e060020a600035041663047f1d798114610077578063126d0854146100a35780634435c3aa146100b55780634a90be57146100c45780634e38e3a2146100e3578063504006ca146100fe578063d46f6cc41461012a578063f324f7571461014c575b610000565b346100005761008760043561015e565b60408051600160a060020a039092168252519081900360200190f35b34610000576100b3600435610194565b005b34610000576100b3610198565b005b34610000576100d161019b565b60408051918252519081900360200190f35b34610000576100b3600160a060020a03600435166101a2565b005b3461000057610087600435610219565b60408051600160a060020a039092168252519081900360200190f35b34610000576100d160043561024f565b60408051918252519081900360200190f35b34610000576100b36004356102d8565b005b6000600182815481101561000057906000526020600020900160005b9054906101000a9004600160a060020a031690505b919050565b5b50565b5b565b6000545b90565b600080548060010182818154818355818115116101e4576000838152602090206101e49181019083015b808211156101e057600081556001016101cc565b5090565b5b505050916000526020600020900160005b8154600160a060020a038086166101009390930a92830292021916179055505b50565b6000600082815481101561000057906000526020600020900160005b9054906101000a9004600160a060020a031690505b919050565b6000600182815481101561000057906000526020600020900160005b9054906101000a9004600160a060020a0316600160a060020a03166316eab96b6000604051602001526040518163ffffffff1660e060020a028152600401809050602060405180830381600087803b156100005760325a03f115610000575050604051519150505b919050565b600080541115806102ea575060005481115b156102f457610194565b600054600114156103825780151561037d57600081815481101561000057906000526020600020900160005b6101000a815490600160a060020a0302191690556000805480919060019003815481835581811511610377576000838152602090206103779181019083015b808211156101e057600081556001016101cc565b5090565b5b505050505b610194565b6000805460001981019081101561000057906000526020600020900160005b9054906101000a9004600160a060020a0316600082815481101561000057906000526020600020900160005b6101000a815481600160a060020a030219169083600160a060020a031602179055506000600160008054905003815481101561000057906000526020600020900160005b6101000a815490600160a060020a0302191690556000805480919060019003815481835581811511610468576000838152602090206104689181019083015b808211156101e057600081556001016101cc565b5090565b5b505050505b5b5b505600a165627a7a72305820a60916fa7d5eaa528f2c014ee5270ec66bb424100afbb2383022bcf8886c007e0029', gasEstimates: {"creation":[269,236600],"external":{"addLoan(address)":null,"getLen()":309,"getLn(uint256)":501,"getLnAmt(uint256)":null,"getLoan(uint256)":611,"mkLns()":186,"rmLoan(uint256)":66766,"setLoan(uint256)":172},"internal":{}}});
+Mortal = new EmbarkJS.Contract({abi: [{"constant":false,"inputs":[],"name":"kill","outputs":[],"payable":false,"type":"function"},{"constant":false,"inputs":[{"name":"newOwner","type":"address"}],"name":"transferOwnership","outputs":[],"payable":false,"type":"function"}], address: '0x980390f3aefdcc22703d794322db0262c691fd8d', code: '60606040525b60008054600160a060020a03191633600160a060020a03161790555b5b60ec806100306000396000f300606060405263ffffffff60e060020a60003504166341c0e1b58114602c578063f2fde38b146038575b6000565b3460005760366050565b005b346000576036600160a060020a0360043516607a565b005b60005433600160a060020a039081169116146069576000565b600054600160a060020a0316ff5b5b565b60005433600160a060020a039081169116146093576000565b6000805473ffffffffffffffffffffffffffffffffffffffff1916600160a060020a0383161790555b5b505600a165627a7a72305820ae3d9d378da86d63f77159909306a85e0c9d0d9d2e497d769bd49a5382bd1c8e0029', gasEstimates: {"creation":[20215,47200],"external":{"kill()":321,"transferOwnership(address)":20418},"internal":{}}});
+Owned = new EmbarkJS.Contract({abi: [{"constant":false,"inputs":[{"name":"newOwner","type":"address"}],"name":"transferOwnership","outputs":[],"payable":false,"type":"function"},{"inputs":[],"payable":false,"type":"constructor"}], address: '0x1c72a1afbedffa8a5f3d370dc1b9b35dea701b4b', code: '606060405234610000575b60008054600160a060020a03191633600160a060020a03161790555b5b60ac806100356000396000f300606060405263ffffffff60e060020a600035041663f2fde38b81146022575b6000565b346000576038600160a060020a0360043516603a565b005b60005433600160a060020a039081169116146053576000565b6000805473ffffffffffffffffffffffffffffffffffffffff1916600160a060020a0383161790555b5b505600a165627a7a72305820776db757484d58296a041502df03683747837e517f6ba752e89cb23e245efc9a0029', gasEstimates: {"creation":[20218,34400],"external":{"transferOwnership(address)":20396},"internal":{}}});
 
 EmbarkJS.Storage.setProvider('ipfs', {server: 'localhost', port: '5001'});
 
@@ -78481,7 +78481,7 @@ $(document).ready(function() {
 
 	//02.04
 	curAcct = web3.eth.defaultAccount;
-	$('#intro .main-acct .result').html(curAcct);
+	$('#intro .cur-acct .result').html(curAcct);
 
 	//23.03
 	//var dbAd = LoanDB.address;
@@ -78494,7 +78494,7 @@ $(document).ready(function() {
 		if (curAcct === "") {
 			curAcct = web3.eth.defaultAccount;
 		}
-		$('#intro .cur-acct .result').html(curAcct);
+		$('#intro .cur-acct .result').html('current: ' + curAcct);
 	});
 
   //.accts
@@ -78623,19 +78623,55 @@ $(document).ready(function() {
 		});
 	});
 
-	//23.03
-	//retrying the display loan content bit
-	//24.03
-	//added repay amount get
-	//26.03
-	//need to rework loans so that
-	//amount is = to balance of new loan
-	//i.e. set amount not necessary
-	//make Loan payable
-	//fund loan
-	//amt() should return balance
-	//or not required at all. should just be web3.eth.getBalance()
-	$('#intro .loandb .ls button').click(function() {
+	//05.04
+	$('#intro .loandb .ls button.available').click(function() {
+		//first get the array length
+		LoanDB.getLen({from:curAcct}).then(function(len) {
+			$('#intro .loandb .ls .result').html('');
+			if (len == 0 ) {
+				$('#intro .loandb .ls .result').html('No loans found');
+			}
+			else {
+				for (var i = 0; i < len; i++) {
+					(function (i) {
+						LoanDB.getLoan(i, {from:curAcct}).then(function(addr) {
+							//$('#intro .loandb .ls .result').append('<br>' + i + ': ' + addr);
+							curLoan = new EmbarkJS.Contract({
+								abi: Loan.abi,
+								address: addr
+							});
+
+/*							curLoan.amt().then(function(amt) {
+								amt = web3.fromWei(amt, 'ether');
+								curLoan.rpy().then(function(rpy) {
+								  $('#intro .loandb .ls .result').append('<br> '+ i + ': ' + addr + ': ' + amt + ', ' + rpy);
+								});
+							});*/
+
+							curLoan.taken().then(function(tkn){
+								if (!tkn) {
+									curLoan.rpy().then(function(rpy) {
+								    var amt = web3.fromWei(web3.eth.getBalance(addr), 'ether');
+  							    $('#intro .loandb .ls .result').append('<br> ' +  i + ': ' + addr + ': ' +
+								    amt + ', ' + rpy);
+							    });
+								}
+							});
+						});
+					})(i);
+				}
+			}
+
+		});
+					var checkIfBlank = $('#intro .loandb .ls .result').text();
+			if (checkIfBlank.length == 0) {
+			  $('#intro .loandb .ls .result').html('No loans available');
+		  }
+	});
+
+	//05.04
+	//all loans
+  $('#intro .loandb .ls button.all').click(function() {
 		//first get the array length
 		LoanDB.getLen({from:curAcct}).then(function(len) {
 			$('#intro .loandb .ls .result').html('');
@@ -78660,14 +78696,112 @@ $(document).ready(function() {
 							});*/
 
 							curLoan.rpy().then(function(rpy) {
-								var amt = web3.fromWei(web3.eth.getBalance(addr), 'ether');
-								$('#intro .loandb .ls .result').append('<br> ' +  i + ': ' + addr + ': ' + amt + ', ' + rpy);
-							});
-
+						    var amt = web3.fromWei(web3.eth.getBalance(addr), 'ether');
+						    $('#intro .loandb .ls .result').append('<br> ' +  i + ': ' + addr + ': ' +
+						    amt + ', ' + rpy);
+					    });
 						});
 					})(i);
 				}
 			}
+		});
+	});
+
+	//05.04
+	$('#intro .loandb .take-ln button').click(function() {
+		var index = $('#intro .loandb .take-ln input').val();
+		//alert(index);
+		LoanDB.getLoan(index , {from: curAcct}).then(function(addr) {
+			curLoan = new EmbarkJS.Contract({
+				abi: Loan.abi,
+				address: addr
+			});
+
+			curLoan.taken().then(function(tkn) {
+				if(!tkn) {
+					curLoan.setBorrower({from: curAcct}).then(function(brw) {
+						curLoan.amt().then(function(amt) {
+							amt = web3.fromWei(amt, 'ether');
+							curLoan.rpy().then(function(rpy) {
+								//rpy = web3.fromWei(rpy, 'ether');
+							  $('#intro .loandb .take-ln .result').html('Loan: ' + addr +
+						    '<br />amt: ' + amt +
+						    '<br />rpy: ' + rpy +
+							  '<br />borrower: ' + curAcct);
+							});
+						});
+					});
+				}
+				else {
+					$('#intro .loandb .take-ln .result').html('Loan at index <code>'+ index +'</code> already taken');
+				}
+			});
+
+/*			curLoan.setBorrower({from: curAcct}).then(function(brw) {
+				curLoan.taken().then(function(tkn) {
+					if (tkn) {
+						$('#intro .loandb .take-ln .result').html('Loan already taken');
+					}
+					else {
+						alert("HELLO");
+						curLoan.amt().then(function(amt) {
+							$('#intro .loandb .take-ln .result').html('Loan: ' + addr +
+								'<br />amt: ' + amt +
+								'<br />borrower: ' + brw);
+						});
+					}
+				});
+			});*/
+/*			curLoan.taken().then(function(tkn) {
+				if (!tkn) {
+					curLoan.setBorrower({from: curAcct}).then(function(brw){
+						alert("loan not taken. set borrower");
+					});
+				}
+				else {
+					alert("already taken, do nothing");
+				}
+			});*/
+		});
+	});
+
+	//05.04
+	$('#intro .loandb .get-br button').click(function() {
+		var index = $('#intro .loandb .get-br input').val();
+		LoanDB.getLoan(index , {from: curAcct}).then(function(addr) {
+			curLoan = new EmbarkJS.Contract({
+				abi: Loan.abi,
+				address: addr
+			});
+			curLoan.borrower().then(function(br) {
+				var brAddr = br.toString();
+				alert(brAddr);
+			});
+		});
+	});
+
+
+
+  //05.04
+	$('#intro .loandb .get-taken button').click(function() {
+		var index = $('#intro .loandb .get-taken input').val();
+		//alert(index);
+		LoanDB.getLoan(index , {from: curAcct}).then(function(addr) {
+			curLoan = new EmbarkJS.Contract({
+				abi: Loan.abi,
+				address: addr
+			});
+			curLoan.taken().then(function(result) {
+				if (result) {
+					alert(result);
+				  $('#intro .loandb .tget-taken .result').html("Loan: " + addr + "<br />" +
+					  "borrower: " + curAcct);
+				}
+				else {
+					alert("false");
+					$('#intro .loandb .get-taken .result').html("Error: couldn't take loan");
+				}
+			});
 		});
 	});
 
