@@ -151,11 +151,12 @@ $(document).ready(function() {
 
 	//05.04
 	$('#intro .loandb .ls button.available').click(function() {
+		$('#intro .loandb .ls .result').html('No available loans found');
+
 		//first get the array length
 		LoanDB.getLen({from:curAcct}).then(function(len) {
-			$('#intro .loandb .ls .result').html('');
 			if (len == 0 ) {
-				$('#intro .loandb .ls .result').html('No loans found');
+				$('#intro .loandb .ls .result').html('No loans in database');
 			}
 			else {
 				for (var i = 0; i < len; i++) {
@@ -176,23 +177,29 @@ $(document).ready(function() {
 
 							curLoan.taken().then(function(tkn){
 								if (!tkn) {
-									curLoan.rpy().then(function(rpy) {
+									Promise.all([
+										curLoan.amt().then(function(amt) {return web3.fromWei(amt, 'ether')}),
+									  curLoan.rpy().then(function(rpy) {return web3.fromWei(rpy, 'ether')})
+										]).then(function(values) {
+											$('#intro .loandb .ls .result').append('' + i + ': ' + addr + ': ' +
+												' amt: ' + values[0] + ' rpy: ' + values[1]);
+										});
+
+
+
+/*									curLoan.rpy().then(function(rpy) {
+										rpy = web3.fromWei(rpy,'ether');
 								    var amt = web3.fromWei(web3.eth.getBalance(addr), 'ether');
   							    $('#intro .loandb .ls .result').append('<br> ' +  i + ': ' + addr + ': ' +
 								    amt + ', ' + rpy);
-							    });
+							    });*/
 								}
 							});
 						});
 					})(i);
 				}
 			}
-
 		});
-					var checkIfBlank = $('#intro .loandb .ls .result').text();
-			if (checkIfBlank.length == 0) {
-			  $('#intro .loandb .ls .result').html('No loans available');
-		  }
 	});
 
 	//05.04
@@ -202,7 +209,7 @@ $(document).ready(function() {
 		LoanDB.getLen({from:curAcct}).then(function(len) {
 			$('#intro .loandb .ls .result').html('');
 			if (len == 0 ) {
-				$('#intro .loandb .ls .result').html('No Loans found');
+				$('#intro .loandb .ls .result').html('No loans in database');
 			}
 			else {
 				for (var i = 0; i < len; i++) {
@@ -221,11 +228,26 @@ $(document).ready(function() {
 								});
 							});*/
 
-							curLoan.rpy().then(function(rpy) {
+							Promise.all([
+								curLoan.amt().then(function(amt) {return web3.fromWei(amt, 'ether')}),
+								curLoan.rpy().then(function(rpy) {return web3.fromWei(rpy, 'ether')}),
+								curLoan.taken().then(function(tkn) {
+									if (tkn) return "Taken";
+									else return "Available";
+								  })
+								]).then(function(values) {
+									var bal = web3.fromWei(web3.eth.getBalance(addr), 'ether');
+									$('#intro .loandb .ls .result').append('' + i + ': ' + addr + ': ' +
+										' amt: ' + values[0] + ' rpy: ' + values[1] + ' bal: ' + bal +
+										' tkn: ' + values[2] + '<br />')
+								});
+
+/*							curLoan.rpy().then(function(rpy) {
+								rpy = web3.fromWei(rpy,'ether');
 						    var amt = web3.fromWei(web3.eth.getBalance(addr), 'ether');
 						    $('#intro .loandb .ls .result').append('<br> ' +  i + ': ' + addr + ': ' +
 						    amt + ', ' + rpy);
-					    });
+					    });*/
 						});
 					})(i);
 				}
@@ -240,7 +262,7 @@ $(document).ready(function() {
 		LoanDB.getLen({from:curAcct}).then(function(len) {
 			$('#intro .loandb .ls .result').html('');
 			if (len == 0 ) {
-				$('#intro .loandb .ls .result').html('No Loans found');
+				$('#intro .loandb .ls .result').html('No loans in database');
 			}
 			else {
 				for (var i = 0; i < len; i++) {
@@ -253,14 +275,16 @@ $(document).ready(function() {
 							});
 
 							Promise.all([
-								  curLoan.amt().then(function(amt) {return amt}),
-								  curLoan.rpy().then(function(rpy) {return rpy}),
+								  curLoan.amt().then(function(amt) {return web3.fromWei(amt,'ether')}),
+								  curLoan.rpy().then(function(rpy) {return web3.fromWei(rpy,'ether')}),
 								  curLoan.taken().then(function(tkn) {
 								  	if (tkn) return "Taken";
 								  	else return "Available";
 								  })
 								]).then(function(values) {
-									$('#intro .loandb .ls .result').append('' + i + ': ' +values[0] + ' ' + values[1] + ' ' + values[2] +'<br />');
+									var bal = web3.fromWei(web3.eth.getBalance(addr),'ether');
+									$('#intro .loandb .ls .result').append('' + i + ':  amt: ' + values[0] +
+										'  rpy: ' + values[1] + '  ' + values[2] +'  bal: ' + bal + '<br />');
 								});
 
 /*							curLoan.amt().then(function(amt) {
@@ -295,7 +319,22 @@ $(document).ready(function() {
 
 			curLoan.taken().then(function(tkn) {
 				if(!tkn) {
-					curLoan.setBorrower({from: curAcct}).then(function(brw) {
+					Promise.all([
+						curLoan.setBorrower({from: curAcct}).then(function(brw) {
+							return "success";
+						}),
+						curLoan.amt().then(function(amt) {
+							return web3.fromWei(amt,'ether');
+						}),
+						curLoan.rpy().then(function(rpy) {
+							return web3.fromWei(rpy, 'ether');
+						})]).then(function(values) {
+							$('#intro .loandb .take-ln .result').html('' + values[0] + '!<br />' +
+								'Loan: ' + addr +
+								'<br />amount: ' + values[1] + ' <br />repayable: ' + values[2] +
+								'<br />taken by: ' + curAcct);
+						});
+/*					curLoan.setBorrower({from: curAcct}).then(function(brw) {
 						curLoan.amt().then(function(amt) {
 							amt = web3.fromWei(amt, 'ether');
 							curLoan.rpy().then(function(rpy) {
@@ -306,7 +345,7 @@ $(document).ready(function() {
 							  '<br />borrower: ' + curAcct);
 							});
 						});
-					});
+					});*/
 				}
 				else {
 					$('#intro .loandb .take-ln .result').html('Loan at index <code>'+ index +'</code> already taken');
@@ -314,6 +353,60 @@ $(document).ready(function() {
 			});
 		});
 	});
+
+	//06.04
+/*	$('#intro .loandb .test button').click(function() {
+		//$('#intro .loandb .test .result').html('hellooo');
+		var addr = $('#intro .loandb .test input').val();
+		curLoan = new EmbarkJS.Contract({
+			abi: Loan.abi,
+			address: addr
+		});
+
+		curLoan.rpy().then(function(rpy) {
+			var rpy = web3.fromWei(rpy,'ether');
+			alert(rpy);
+			$('#intro .loandb .test .result').html('' + rpy);
+		});		
+		//$('#intro .loandb .test .result').html(' yo');
+	});*/
+
+	//06.04
+  $('#intro .loandb .rpy-ln button').click(function() {
+  	var addr = $('#intro .loandb .rpy-ln input').val();
+		curLoan = new EmbarkJS.Contract({
+			abi: Loan.abi,
+			address: addr
+		});
+
+		//$('#intro .loandb .rpy-ln .result').html('hello');
+/*		Promise.all([
+			curLoan.rpy().then(function(rpy) {return rpy})]).then(function(values) {
+				$('#intro .loandb .rpy-ln .result').html("HELLO");
+			});*/
+
+		Promise.all([
+			curLoan.rpy().then(function(rpy) {return rpy}),
+			curLoan.borrower().then(function(brw) {return brw})
+			]).then(function(values) {
+				//alert('hello');
+				if (curAcct != values[1]) {
+					alert('error: you are not the borrower for this loan');
+					//$('#intro .loandb .rpy-ln .result').html('Error');
+				}
+				else {
+					//alert('success');
+					web3.eth.sendTransaction({to:addr, from:curAcct, value: values[0]}, function(err, success) {
+						alert('successfully repaid loan');
+						//$('#intro .loandb .rpy-ln .result').html('Successfully repaid loan');
+					});
+				}
+			});
+/*		(curLoan.rpy().then(function(rpy) {
+			alert(rpy);
+			web3.eth.sendTransaction({to: addr, from: curAcct, })
+		});  	*/
+  });
 
 	//05.04
 	$('#intro .loandb .get-br button').click(function() {
@@ -344,7 +437,7 @@ $(document).ready(function() {
 			curLoan.taken().then(function(result) {
 				if (result) {
 					alert(result);
-				  $('#intro .loandb .tget-taken .result').html("Loan: " + addr + "<br />" +
+				  $('#intro .loandb .get-taken .result').html("Loan: " + addr + "<br />" +
 					  "borrower: " + curAcct);
 				}
 				else {
@@ -404,35 +497,40 @@ $(document).ready(function() {
 	//26.04
 	//Loan contracts need to be funded from the creator account
 	//web3.eth.sendTransaction({txObj})
+	//06.04 having difficulties with
+	//adding amount and repay values of loans
 	$('#intro .loandb .add button').click(function() {
-		var amt = web3.toWei($('#intro .loandb .add input.amt').val());
+		//var amt = web3.toWei($('#intro .loandb .add input.amt').val());
 		//amt = web3.toWei(amt, 'ether');
+		//var rpy = web3.toWei($('#intro .loandb .add input.rpy').val());
+
+		var amt = $('#intro .loandb .add input.amt').val();
 		var rpy = $('#intro .loandb .add input.rpy').val();
+
+		var amtWei = web3.toWei(amt, 'ether');
+		var rpyWei = web3.toWei(rpy, 'ether');
 
 		//26.03
 		//added Loan.deploy([args],{txOptions})
-		Loan.deploy([web3.fromWei(amt,'ether'), rpy], {from: curAcct, value: amt}).then(function(deployedLoan) {
+		Loan.deploy([amtWei, rpyWei], {from: curAcct, value: amtWei}).then(function(deployedLoan) {
 			curLoan = deployedLoan;
-			$('#intro .loandb .add .result').append('<br>Loan deployed: ' + deployedLoan.address + '(' + web3.fromWei(amt,'ether') + ',' +' ' + rpy +')');
 
+			$('#intro .loandb .add .result').append('<br>Loan deployed: ' + deployedLoan.address + '(' + amt +
+				', ' + rpy +')');
+
+
+			/*deployedLoan.initLoan(amt, rpy, {from: curAcct}).then(function(success) {
+				if(success) {
+					$('#intro .loandb .add .result').append('<br>Loan deployed: ' + deployedLoan.address + '(' + amt +
+				  ', ' + rpy +')');
+				}
+				else $('#intro .loandb .add .result').append('Error: loan amt and rpy not initialised');
+			});
+*/
 			ldb.addLoan(deployedLoan.address, {from: curAcct}).then(function() {
 				$('#intro .loandb .add .result').append(' added to db');
 
-				web3.eth.sendTransaction({from: curAcct, to: deployedLoan.address, value: amt});
-
-/*				web3.eth.getCoinbase(function(err, addr) {
-					$('#intro .loandb .add .result').append('<br> from addr: ' + addr);
-				});*/
-
-				//26.03 marked for deletion
-/*				web3.eth.getBalance(deployedLoan.address, function(err, result) {
-					alert(result);
-				});*/
-
-				//26.03 attempting to send funds to Loan
-/*				web3.eth.sendTransaction({to: deployedLoan.address, value: amt * 1 ether}).then(function() {
-					$('#intro .loandb .add .result').append('<br>Loan funded with ' + amt + ' ether');
-				});*/
+				web3.eth.sendTransaction({from: curAcct, to: deployedLoan.address, value: amtWei});
 			});
 		});
 	});
@@ -475,6 +573,8 @@ $(document).ready(function() {
 	});
 
 	//23.03 better termed as set current loan
+	//06.04 altered to actually inspect the values i.e.
+	//return amt rpy and taken
 	$('#intro .loandb .inspect button').click(function() {
 		var index = $('#intro .loandb .inspect input').val();
 		LoanDB.getLoan(index, {from: curAcct}).then(function(addr) {
@@ -483,6 +583,10 @@ $(document).ready(function() {
   	    abi: Loan.abi,
   	    address: addr
   		});
+			curLoan.rpy().then(function(rpy) {
+				alert(rpy);
+				$('#intro .loandb .inspect .result').html(rpy);
+			});
 		});
 	});
 

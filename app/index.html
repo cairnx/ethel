@@ -145,6 +145,22 @@
             <div class="result"></div>
           </div>
 
+<!--
+          <div class="form-group test">
+            <input placeholder="loan address" />
+          	<button>test</button>
+          	<div class="result"></div>
+          </div>
+-->
+
+          <div class="form-group rpy-ln">
+            <h4>Repay Loan</h4>
+            <p>Repay a loan that you have taken</p>
+          	<input placeholder="enter loan address" />
+          	<button>Repay loan</button>
+          	<div classs="result"></div>
+          </div>
+
           <div class="form-group get-br">
             <h4>Get Borrower</h4>
             <p>Get <code>address borrower</code> for loan at index <code>n</code></p>
@@ -207,9 +223,12 @@
 
         </div>	
 		  </div>
+		  
 		  <div class="tab-pane" id="sand">
 		   	<h3>Nothing to see here</h3>
 		  </div>
+
+		  <!--Worklog tabpane -->
 		  <div class="tab-pane" id="worklog">
 		   	<h3>Development Worklog</h3>
         <h4>02.04</h4>
@@ -270,13 +289,34 @@
           <b>Refactor code to make use of Promises.all i.e. make it less ugly</b>
         </p>
 
+        <h4>06.04</h4>
+        <p><b>Notes</b></p>
+        <p>
+        	Need to rework diagrams in dissertation<br />
+        	Rework Requirements section<br />
+        </p>
+
+        <p><b>End of session</b></p>
+        <p>
+        	Fixed amount and repay issue - decimals not being stored in contract because of uint<br />
+        	Instead, loan amount in wei is stored<br />
+        	Also refactored ls and take-ln code to use Promise.all<p>
+        	Implemented a bit of repay<br />
+        </p>
+
+        <p><b>Next steps</b></p>
+        <p>
+        	See notes<br />
+        	Document repay issues<br />
+        	alerts used for output<br />
+        </p>
+
         <h3>Documented Experiments</h3>
        	<ul>
        		<li>Experiment 1 - 02.04</li>
        		<li>Experiment 2 - 05.04</li>
         </ul>
       </div>
-		  </div>
 		</div>
 
 		<script>

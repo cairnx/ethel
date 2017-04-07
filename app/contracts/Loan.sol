@@ -1,3 +1,4 @@
+
 pragma solidity ^0.4.8;
 import "Mortal.sol";
 
@@ -10,35 +11,32 @@ contract Loan is Mortal {
 	uint public rpy;
 	address public borrower;
 	bool public taken;
+	bool public repaid;
 
-	function Loan (uint _amt, uint _rpy) payable {
-		amt = _amt;
-		rpy = _rpy;
+	function Loan(uint _amt, uint _rpy) payable {
 		taken = false;
-	}
-
-	//24.03
-	//seems its not required because of automagical public field
-/*  function getAmt() constant returns (uint) {
-		return amt;
-	}*/
-
-	function setAmt(uint _amt) {
+		repaid = false;
 		amt = _amt;
-	}
-
-	function setRpy(uint _rpy) {
 		rpy = _rpy;
 	}
 
 	function() payable {
 	}
 
+	//05.04
 	function setBorrower() returns (bool) {
 		if (taken == false) {
 			borrower = msg.sender;
 			taken = true;
 			return borrower.send(this.balance);
+		}
+		else return false;
+	}
+
+	function repay() payable returns (bool) {
+		if (msg.value == rpy && msg.sender == borrower) {
+			repaid = true;
+			return repaid;
 		}
 		else return false;
 	}
