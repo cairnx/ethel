@@ -7,7 +7,7 @@ $(document).ready(function() {
 
 	//02.04
 	curAcct = web3.eth.defaultAccount;
-	$('#intro .cur-acct .result').html(curAcct);
+	$('#intro .cur-acct .result').html('current: ' + curAcct);
 
 	//23.03
 	//var dbAd = LoanDB.address;
@@ -22,6 +22,22 @@ $(document).ready(function() {
 		}
 		$('#intro .cur-acct .result').html('current: ' + curAcct);
 	});
+
+/*	//08.04
+	//added indexed account switching
+	$('#intro .cur-acct button').click(function() {
+		var index = $('#intro .cur-acct .index').val();
+		try {
+			if (index > 9 || index < 0) throw "index must be between 0-9";
+		}
+		catch {
+			$('#intro .cur-acct .result').html(err);
+		}
+		if (curAcct === "") {
+			curAcct = web3.eth.defaultAccount[index];
+		}
+		$('#intro .cur-acct .result').html('selected account at index ' + index + '<br />current: ' + curAcct);
+	})*/
 
   //.accts
   $('#intro .accts button').click(function() {
@@ -159,6 +175,7 @@ $(document).ready(function() {
 				$('#intro .loandb .ls .result').html('No loans in database');
 			}
 			else {
+				$('#intro .loandb .ls .result').html('');
 				for (var i = 0; i < len; i++) {
 					(function (i) {
 						LoanDB.getLoan(i, {from:curAcct}).then(function(addr) {
@@ -204,6 +221,7 @@ $(document).ready(function() {
 
 	//05.04
 	//ls all loans
+	//08.04 adapted to include repayment status
   $('#intro .loandb .ls button.all').click(function() {
 		//first get the array length
 		LoanDB.getLen({from:curAcct}).then(function(len) {
@@ -234,12 +252,16 @@ $(document).ready(function() {
 								curLoan.taken().then(function(tkn) {
 									if (tkn) return "Taken";
 									else return "Available";
-								  })
+								  }),
+								curLoan.repaid().then(function(repaid) {
+									if (repaid) return "Repaid";
+									else return "Awaiting repayment";
+								})
 								]).then(function(values) {
 									var bal = web3.fromWei(web3.eth.getBalance(addr), 'ether');
 									$('#intro .loandb .ls .result').append('' + i + ': ' + addr + ': ' +
 										' amt: ' + values[0] + ' rpy: ' + values[1] + ' bal: ' + bal +
-										' tkn: ' + values[2] + '<br />')
+										' ' + values[2] + ' ' + values[3] + ' <br />')
 								});
 
 /*							curLoan.rpy().then(function(rpy) {
@@ -373,11 +395,43 @@ $(document).ready(function() {
 
 	//06.04
   $('#intro .loandb .rpy-ln button').click(function() {
-  	var addr = $('#intro .loandb .rpy-ln input').val();
-		curLoan = new EmbarkJS.Contract({
-			abi: Loan.abi,
-			address: addr
-		});
+  	var index = parseInt($('#intro .loandb .rpy-ln input').val());
+
+  	//first get the loan
+  	LoanDB.getLoan(index, {from: curAcct}).then(function(addr) {
+  		curLoan = new EmbarkJS.Contract({
+  			abi: Loan.abi,
+  			address:  addr
+  		});
+
+	  	Promise.all([
+				curLoan.rpy().then(function(rpy) {return parseFloat(web3.fromWei(rpy,'ether'));}),
+				curLoan.borrower().then(function(brw) {return brw;}),
+				curLoan.amt().then(function(amt) {return amt;}),
+				curLoan.repaid().then(function(repaid) {return repaid;})
+				]).then(function(values) {
+					if (curAcct != values[1]) {
+						alert('you are not the borrower for this loan');
+						$('#intro .loandb .rpy-ln .result').html('Error: you aren\'t the borrower for this loan');
+					}
+					else if(values[3]) {
+						alert('Error: loan has already been repaid');
+					}
+					else if (values[0] > parseFloat(web3.fromWei(web3.eth.getBalance(curAcct),'ether'))) {
+						alert('Error: you don\'t have enough ether');
+					}
+					else {
+						curLoan.repay({from: curAcct, value: web3.toWei(values[0],'ether')}).then(function() {
+							alert ('repaid loan: ' + values[0] + ' ether')
+							$('#intro .loandb .rpy-ln .result').html('successfully repaid loan' +
+								'<br />' + rpy + ' ether sent' +
+								'<br />from: ' + curAcct +
+								'<br />loan: ' + addr);
+						});
+					}
+				});
+  	});
+
 
 		//$('#intro .loandb .rpy-ln .result').html('hello');
 /*		Promise.all([
@@ -385,23 +439,7 @@ $(document).ready(function() {
 				$('#intro .loandb .rpy-ln .result').html("HELLO");
 			});*/
 
-		Promise.all([
-			curLoan.rpy().then(function(rpy) {return rpy}),
-			curLoan.borrower().then(function(brw) {return brw})
-			]).then(function(values) {
-				//alert('hello');
-				if (curAcct != values[1]) {
-					alert('error: you are not the borrower for this loan');
-					//$('#intro .loandb .rpy-ln .result').html('Error');
-				}
-				else {
-					//alert('success');
-					web3.eth.sendTransaction({to:addr, from:curAcct, value: values[0]}, function(err, success) {
-						alert('successfully repaid loan');
-						//$('#intro .loandb .rpy-ln .result').html('Successfully repaid loan');
-					});
-				}
-			});
+
 /*		(curLoan.rpy().then(function(rpy) {
 			alert(rpy);
 			web3.eth.sendTransaction({to: addr, from: curAcct, })
@@ -436,13 +474,13 @@ $(document).ready(function() {
 			});
 			curLoan.taken().then(function(result) {
 				if (result) {
-					alert(result);
+					alert("loan unavailable - already taken");
 				  $('#intro .loandb .get-taken .result').html("Loan: " + addr + "<br />" +
 					  "borrower: " + curAcct);
 				}
 				else {
-					alert("false");
-					$('#intro .loandb .get-taken .result').html("Error: couldn't take loan");
+					//alert("this loan is available");
+					$('#intro .loandb .get-taken .result').html("loan is available");
 				}
 			});
 		});

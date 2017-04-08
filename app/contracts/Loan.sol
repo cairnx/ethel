@@ -33,12 +33,16 @@ contract Loan is Mortal {
 		else return false;
 	}
 
+	//08.04
 	function repay() payable returns (bool) {
-		if (msg.value == rpy && msg.sender == borrower) {
+		if (repaid == false && msg.value == rpy && msg.sender == borrower) {
 			repaid = true;
 			return repaid;
 		}
-		else return false;
+		else {
+			bool refund = msg.sender.send(msg.value);
+			return false;
+		}
 	}
 
 	//02.04 added as part of experimentation
