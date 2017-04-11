@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
   <head>
-    <title>Ethl - Ethereum Blockchain P2P Lending Dapp</title>
+    <title>Ethel - Ethereum Blockchain P2P Lending Dapp</title>
     <link rel="stylesheet" href="css/app.css">
     <script src="js/app.js"></script>
     <script type="text/javascript">
@@ -25,7 +25,7 @@
   </head>
   <body class="container">
 
-    <h3>ethl - ethereum p2p lending dapp</h3>
+    <h3>ethel - ethereum p2p lending dapp</h3>
     <p>Under development<br />
       <a href="https://github.com/cairnx/ethl">https://github.com/cairnx/ethl</a>
     </p>
@@ -133,6 +133,7 @@
             <button class="available">Available</button>
             <button class="all">All</button>
             <button class="test">Test</button><!-- testing promises and such -->
+            <button class="rq">Requests</button><!-- view requests -->
             <div class="result"></div>
           </div>
 
@@ -196,6 +197,33 @@
           	<input class="rpy" placeholder="repayable" />
           	<button>Add loan</button>
           	<div class="result"></div>
+          </div>
+
+          <!-- 10.04 loan request -->
+          <div class = "form-group rq">
+            <h4>Request Loan</h4>
+            <p>Enter loan parameters</p>
+            <input class="amt" placeholder="amount" />
+            <input class="rpy" placeholder="repayable" />
+            <button>Add request</button>
+            <div class="result"></div>
+          </div>
+
+          <!-- 10.04 fill loan rq -->
+          <div class = "form-group fill-rq">
+            <h4>Fill Request</h4>
+            <p>Enter loan index for the request you want to fill</p>
+            <input class="index" placeholder="enter loan index" />
+            <button>Fill request</button>
+            <div class="result"></div>
+          </div>
+
+          <div class = "form-group get-owner">
+            <h4>Get Loan Owner</h4>
+            <p>Enter loan address -> receive owner address</p>
+            <input placeholder="enter loan address" />
+            <button>Get owner</button>
+            <div class="result"></div>
           </div>
 
           <!--24.03 kill loan-->
@@ -311,10 +339,31 @@
         	alerts used for output<br />
         </p>
 
+        <h4>08.04</h4>
+        <p><b>Notes</b></p>
+        <p>
+          Worked on requirements<br />
+          Added Zopa comparison<br />
+          Added persona and scenarios<br />
+          Experiment 3 - Loan repayment<br />
+          <b>Experiments odt is in Downloads folder of Latitude machine</b>
+          <b>Renamed app to Ethel</b><br />
+        </p>
+
+        <p><b>Next Steps</b></p>
+          Start to clean up interface<br />
+          Implement credit ratings<br />
+          Implement loan requests<br />
+          Finish requirements<br />
+        <p>
+        
+        </p>
+
         <h3>Documented Experiments</h3>
        	<ul>
        		<li>Experiment 1 - 02.04</li>
        		<li>Experiment 2 - 05.04</li>
+          <li>Experiment 3 - 08.04</li>
         </ul>
       </div>
 		</div>

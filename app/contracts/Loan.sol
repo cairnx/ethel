@@ -1,4 +1,3 @@
-
 pragma solidity ^0.4.8;
 import "Mortal.sol";
 
@@ -12,12 +11,15 @@ contract Loan is Mortal {
 	address public borrower;
 	bool public taken;
 	bool public repaid;
+	bool public request;
 
-	function Loan(uint _amt, uint _rpy) payable {
+	function Loan(uint _amt, uint _rpy, bool _request) payable {
 		taken = false;
 		repaid = false;
 		amt = _amt;
 		rpy = _rpy;
+		request = _request;
+		borrower = msg.sender;
 	}
 
 	function() payable {
@@ -43,6 +45,17 @@ contract Loan is Mortal {
 			bool refund = msg.sender.send(msg.value);
 			return false;
 		}
+	}
+
+	//10.04
+	function fillRequest() payable returns (bool) {
+		if(request == true && msg.value == amt) {
+			transferToLender(msg.sender);
+			request = false;
+			taken = true;
+			return borrower.send(this.balance);
+		}
+		else return false;
 	}
 
 	//02.04 added as part of experimentation
