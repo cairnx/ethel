@@ -1,5 +1,28 @@
 $(document).ready(function() {
 
+
+	function formatDate(timestamp) {
+		var timestampMilliseconds = timestamp * 1000;
+		var date = new Date(timestampMilliseconds);
+
+    var monthNames = [
+      "January", "February", "March",
+      "April", "May", "June", "July",
+      "August", "September", "October",
+      "November", "December"
+    ];
+
+    var day = date.getDate();
+    var monthIndex = date.getMonth();
+    var year = date.getFullYear();
+
+    var meridiem = (date.getHours() > 12 ? 'pm' : 'am');
+    var mins  = (date.getMinutes() < 10 ? '0' : '') + date.getMinutes();
+    var hours = (date.getHours() % 12 || 12);
+
+    return hours + ':' + mins + ' ' + meridiem + ' on ' + day + ' ' + monthNames[monthIndex] + ' ' + year;
+  }
+
 	var curLoan;
 	var curLoanIndex;
 	var addrReg; //23.03 marked for deletion
@@ -247,25 +270,26 @@ $(document).ready(function() {
 							});*/
 
 							Promise.all([
-								curLoan.amt().then(function(amt) {return web3.fromWei(amt, 'ether')}),
-								curLoan.rpy().then(function(rpy) {return web3.fromWei(rpy, 'ether')}),
-								curLoan.taken().then(function(tkn) {
+								curLoan.amt({from:curAcct}).then(function(amt) {return web3.fromWei(amt, 'ether')}), //0 amt
+								curLoan.rpy({from:curAcct}).then(function(rpy) {return web3.fromWei(rpy, 'ether')}), //1 rpy
+								curLoan.taken({from:curAcct}).then(function(tkn) {  //2 availability
 									if (tkn) return "Taken";
 									else return "Available";
 								  }),
-								curLoan.repaid().then(function(repaid) {
+								curLoan.repaid({from:curAcct}).then(function(repaid) {  //3 repayment status
 									if (repaid) return "Repaid";
 									else return "Awaiting repayment";
 								}),
-								curLoan.request().then(function(request) {
+								curLoan.request({from:curAcct}).then(function(request) {  //4 request or offer
 									if (request) return "Request";
 									else return "Offer";
-								})
+								}),
+								curLoan.duration({from:curAcct}).then(function(dur) { return dur; })  //5 duration
 								]).then(function(values) {
 									var bal = web3.fromWei(web3.eth.getBalance(addr), 'ether');
 									$('#intro .loandb .ls .result').append('' + i + ': ' + addr + ': ' +
-										' amt: ' + values[0] + ' rpy: ' + values[1] + ' bal: ' + bal +
-										' ' + values[2] + ' ' + values[3] + ' ' + values[4] + ' <br />')
+										' amt: ' + values[0] + ' rpy: ' + values[1] + ' dur: ' + values[5] + ' days ' +
+										' bal: ' + bal + ' ' + values[2] + ' ' + values[3] + ' ' + values[4] + ' <br />');
 								});
 
 /*							curLoan.rpy().then(function(rpy) {
@@ -301,9 +325,9 @@ $(document).ready(function() {
 							});
 
 							Promise.all([
-								  curLoan.amt().then(function(amt) {return web3.fromWei(amt,'ether')}),
-								  curLoan.rpy().then(function(rpy) {return web3.fromWei(rpy,'ether')}),
-								  curLoan.taken().then(function(tkn) {
+								  curLoan.amt().then(function(amt) {return web3.fromWei(amt,'ether')}), //0 amt
+								  curLoan.rpy().then(function(rpy) {return web3.fromWei(rpy,'ether')}), //1 rpy
+								  curLoan.taken().then(function(tkn) {	//2 availability
 								  	if (tkn) return "Taken";
 								  	else return "Available";
 								  })
@@ -349,19 +373,16 @@ $(document).ready(function() {
 								address: addr
 							});
 							Promise.all([
-								curLoan.amt().then(function(amt) {return web3.fromWei(amt, 'ether')}),
-								curLoan.rpy().then(function(rpy) {return web3.fromWei(rpy, 'ether')}),
-								curLoan.repaid().then(function(repaid) {
-									if (repaid) return "Repaid";
-									else return "Awaiting repayment";
-								}),
-								curLoan.request().then(function(request) { return request; })
+								curLoan.amt().then(function(amt) {return web3.fromWei(amt, 'ether')}), //0 amt
+								curLoan.rpy().then(function(rpy) {return web3.fromWei(rpy, 'ether')}), //1 rpy
+								curLoan.duration().then(function(dur) {return dur;}), //2 duration
+								curLoan.request().then(function(request) { return request; }) //3 offer or request
 								]).then(function(values) {
-									if (values[3]) {
+									if (values[3]) {	//if loan is a request display info
 										var bal = web3.fromWei(web3.eth.getBalance(addr), 'ether');
 										$('#intro .loandb .ls .result').append('' + i + ': ' + addr + ': ' +
 											' amt: ' + values[0] + ' rpy: ' + values[1] + ' bal: ' + bal +
-											' ' + values[2] + '<br />');
+											' duration: ' + values[2] + ' days<br />');
 									}
 								});
 						});
@@ -385,7 +406,7 @@ $(document).ready(function() {
 			curLoan.taken().then(function(tkn) {
 				if(!tkn) {
 					Promise.all([
-						curLoan.setBorrower({from: curAcct}).then(function(brw) {
+						curLoan.takeLoan({from: curAcct}).then(function(brw) {
 							return "success";
 						}),
 						curLoan.amt().then(function(amt) {
@@ -441,7 +462,7 @@ $(document).ready(function() {
   	var index = parseInt($('#intro .loandb .rpy-ln input').val());
 
   	//first get the loan
-  	LoanDB.getLoan(index, {from: curAcct}).then(function(addr) {
+  	ldb.getLoan(index, {from: curAcct}).then(function(addr) {
   		curLoan = new EmbarkJS.Contract({
   			abi: Loan.abi,
   			address:  addr
@@ -492,7 +513,7 @@ $(document).ready(function() {
 	//05.04
 	$('#intro .loandb .get-br button').click(function() {
 		var index = $('#intro .loandb .get-br input').val();
-		LoanDB.getLoan(index , {from: curAcct}).then(function(addr) {
+		ldb.getLoan(index , {from: curAcct}).then(function(addr) {
 			curLoan = new EmbarkJS.Contract({
 				abi: Loan.abi,
 				address: addr
@@ -510,7 +531,7 @@ $(document).ready(function() {
 	$('#intro .loandb .get-taken button').click(function() {
 		var index = $('#intro .loandb .get-taken input').val();
 		//alert(index);
-		LoanDB.getLoan(index , {from: curAcct}).then(function(addr) {
+		ldb.getLoan(index , {from: curAcct}).then(function(addr) {
 			curLoan = new EmbarkJS.Contract({
 				abi: Loan.abi,
 				address: addr
@@ -580,6 +601,7 @@ $(document).ready(function() {
 	//web3.eth.sendTransaction({txObj})
 	//06.04 having difficulties with
 	//adding amount and repay values of loans
+	//11.04 duration
 	$('#intro .loandb .add button').click(function() {
 		//var amt = web3.toWei($('#intro .loandb .add input.amt').val());
 		//amt = web3.toWei(amt, 'ether');
@@ -587,13 +609,14 @@ $(document).ready(function() {
 
 		var amt = $('#intro .loandb .add input.amt').val();
 		var rpy = $('#intro .loandb .add input.rpy').val();
+		var dur = $('#intro .loandb .add input.duration').val();
 
 		var amtWei = web3.toWei(amt, 'ether');
 		var rpyWei = web3.toWei(rpy, 'ether');
 
 		//26.03
 		//added Loan.deploy([args],{txOptions})
-		Loan.deploy([amtWei, rpyWei, false], {from: curAcct, value: amtWei}).then(function(deployedLoan) {
+		Loan.deploy([amtWei, rpyWei, false, dur], {from: curAcct, value: amtWei}).then(function(deployedLoan) {
 			curLoan = deployedLoan; //marked for deletion
 
 			$('#intro .loandb .add .result').html('Loan deployed: ' + deployedLoan.address + ' (' + amt +
@@ -617,14 +640,16 @@ $(document).ready(function() {
 	});
 
 	//10.04 - loan requests
+	//11.04 - added duration
 	$('#intro .loandb .rq button').click(function() {
 		var amt = $('#intro .loandb .rq input.amt').val();
 		var rpy = $('#intro .loandb .rq input.rpy').val();
+		var dur = $('#intro .loandb .rq input.duration').val();
 
 		var amtWei = web3.toWei(amt, 'ether');
 		var rpyWei = web3.toWei(rpy, 'ether');
 
-		Loan.deploy([amtWei, rpyWei, true], {from: curAcct, value: amtWei}).then(function(deployedLoan) {
+		Loan.deploy([amtWei, rpyWei, true, dur], {from: curAcct, value: amtWei}).then(function(deployedLoan) {
 			curLoan = deployedLoan; //marked for deletion
 
 			$('#intro .loandb .rq .result').html('Loan request deployed: ' + deployedLoan.address + '(' + amt +
@@ -693,14 +718,41 @@ $(document).ready(function() {
 						abi: Loan.abi,
 						address: addr
 					});
-					curLoan.kill({from:curAcct}).then(function() {
+
+					curLoan.owner.call({from: curAcct}).then(function(owner) {
+						if (curAcct == owner) {
+							ldb.rmLoan(index, {from:curAcct}).then(function() {
+								curLoan.kill({from:curAcct}).then(function() {
+									$('#intro .loandb .rm .result').html('removed loan: ' + addr);
+								});
+							});
+						}
+						else {
+							$('#intro .loandb .rm .result').html('You must be the owner to remove a loan');
+						}
+/*						if (curAcct == owner) {
+							Promise.all([
+								curLoan.kill({from:curAcct}).then(function() {
+									return "Loan removed from blockchain";
+								}),
+								ldb.rmLoan()
+								]).then(function(values) {
+
+								});
+						}
+						else $('#intro .loandb .rm .result').html('curAcct != owner');*/
+					}).catch(function(e){
+						console.log('curAcct.owner.call error -- check curAcct');
+					});
+
+/*					curLoan.kill({from:curAcct}).then(function() {
 						var rmAddr = addr.toString();
 						ldb.rmLoan(index, {from:curAcct}).then(function() {
 							$('#intro .loandb .rm .result').html('removed loan: ' + rmAddr);
 						}).catch('LoanDB.rmLoan promise rejection');
 					}).catch(function() {
 						console.log('curLoan.kill promise rejection. Could not remove loan');
-					});
+					});*/
 				});
 			}
 		});
@@ -724,18 +776,147 @@ $(document).ready(function() {
 	//23.03 better termed as set current loan
 	//06.04 altered to actually inspect the values i.e.
 	//return amt rpy and taken
-	$('#intro .loandb .inspect button').click(function() {
+	//11.04 comprehensive info display functionality added
+	$('#intro .loandb .inspect button.ins').click(function() {
+
 		var index = $('#intro .loandb .inspect input').val();
-		LoanDB.getLoan(index, {from: curAcct}).then(function(addr) {
-			curLoanIndex = index;
-			curLoan= new EmbarkJS.Contract({
+
+		//11.04 index validator - consider turning into a function
+		if (index < 0 || isNaN(index)) {
+			alert('invalid index: enter a positive integer');
+		}
+
+		ldb.getLen({from:curAcct}).then(function(len) {
+			len = parseInt(len);
+			if (len == 0) { alert('no loans in database'); }
+			else if (index > len) { alert('index out of bounds'); };
+		}).catch('ldb.getLen promise rejection');
+
+		ldb.getLoan(index, {from: curAcct}).then(function(addr) {
+			curLoanIndex = index; //marked for deletion
+			curLoan = new EmbarkJS.Contract({
   	    abi: Loan.abi,
   	    address: addr
   		});
-			curLoan.rpy().then(function(rpy) {
-				alert(rpy);
-				$('#intro .loandb .inspect .result').html(rpy);
-			});
+
+			Promise.all([
+				curLoan.amt({from:curAcct}).then(function(amt) { return web3.fromWei(amt, 'ether'); }), //0 amount
+				curLoan.rpy({from:curAcct}).then(function(rpy) { return web3.fromWei(rpy, 'ether'); }), //1 repayment
+				curLoan.duration({from:curAcct}).then(function(dur) { return dur; }), //2 duration
+				curLoan.start({from:curAcct}).then(function(start) { return start; }), //3 start timestamp
+				curLoan.request({from:curAcct}).then(function(rq) { //4 request or offer
+				  if (rq) return 'request';
+				  else return 'offer';
+				}),
+				curLoan.taken({from:curAcct}).then(function(tkn) { //5 taken or available
+					if (tkn) return 'taken';
+					else return 'available';
+				}),
+				curLoan.repaid({from:curAcct}).then(function(repaid) { //6 repaid or awaiting repayment
+					if (repaid) return 'complete';
+					else return 'pending';
+				}),
+				curLoan.owner({from:curAcct}).then(function(owner) {return owner.toString(); }), //7 owner
+				curLoan.borrower({from:curAcct}).then(function(brw) {return brw.toString(); }), //8 borrower
+				curLoan.deadline({from:curAcct}).then(function(dead) { return dead; }) ///9 deadline
+				]).then(function(values) {
+					//if loan is available then repayment status, start time and deadline are N/A
+					if (values[5] == 'available') {
+						values[6] = 'N/A'; //repayment status
+						values[3] = 'N/A'; //start time 
+						values[9] = 'N/A'; //deadline
+					}
+					else { //else if the loan is taken
+						values[3] = formatDate(values[3]);
+						values[9] = formatDate(values[9]);
+					}
+					$('#intro .loandb .inspect .result').html('Inspecting loan: ' + addr +
+						'<br />Amount: ' + values[0] + ' ether' +
+						'<br />Repayment: ' + values[1] + ' ether' +
+						'<br />Balance: ' + web3.fromWei(web3.eth.getBalance(addr),'ether') + ' ether' +
+						'<br />Duration: ' + values[2] + ' days' +
+						'<br />Start: ' + values[3] + //formatDate(values[3]) + 
+						'<br />Deadline: ' + values[9] + //formatDate(values[9]) +
+						'<br />Type: ' + values[4] +
+						'<br />Status: ' + values[5] +
+						'<br />Repayment: ' + values[6] +
+						'<br />Owner: ' + values[7] +
+						'<br />Borrower: ' + values[8]  
+						);
+				});
+		}).catch('ldb.getLoan promise rejection');
+	});
+
+	$('#intro .loandb .inspect button.clr').click(function() {
+		$('#intro .loandb .inspect .result').html('');
+	});
+
+	$('#intro .loandb .set-ldb button.set').click(function() {
+		var index = $('#intro .loandb .set-ldb input.index').val();
+		ldb.getLoan(index, {from: curAcct}).then(function(addr) {
+			curLoanIndex = index; //marked for deletion
+			curLoan = new EmbarkJS.Contract({
+  	    abi: Loan.abi,
+  	    address: addr
+  		});
+  		curLoan.setLdb(dbAddr, {from: curAcct}).then(function() {
+  			$('#intro .loandb .set-ldb .result').html('Set ldb for loan at <code>' + index + '</code>');
+  		}).catch('setLdb promise rejection');
+  	});
+/*  	var loanAddr = $('#intro .loandb .set-ldb input.loanAddr').val();
+  	var loanDBAddr = $('#intro .loandb .set-ldb input.loanDBAddr').val();
+  	curLoan = new EmbarkJS.Contract({
+  		abi: Loan.abi,
+  		address: loanAddr
+  	});
+  	curLoan.setLdb(dbAddr, {from: curAcct}).then(function() {
+  		$('#intro .loandb .set-ldb .result').html('Set ldb');
+  		$('#intro .loandb .set-ldb .result').append('<br />input db addr: ' + loanDBAddr +
+  			'<br />default db addr: ' + dbAddr);
+  	});*/
+	});
+
+	//11.04 marked for deletion - refactor to provide all loans with db addr thru constructor
+	$('#intro .loandb .set-ldb button.get').click(function() {
+		var index = $('#intro .loandb .set-ldb input').val();
+		ldb.getLoan(index, {from: curAcct}).then(function(addr) {
+			curLoanIndex = index; //marked for deletion
+			curLoan = new EmbarkJS.Contract({
+  	    abi: Loan.abi,
+  	    address: addr
+  		});
+  		curLoan.getLdbAddr({from: curAcct}).then(function(ldbAddr) {
+  			ldbAddr = ldbAddr.toString();
+  			$('#intro .loandb .set-ldb .result').html('LoanDB address: ' + ldbAddr );
+  		});
+    });
+	});
+
+	//11.04
+	$('#intro .loandb .credit button.get').click(function() {
+		var userAddr = $('#intro .loandb .credit input.user-addr').val();
+
+		//ldb.getCreditScore(userAddr, {from:curAcct}).then(function(score) {
+		ldb.getCreditScore(userAddr,{from:curAcct}).then(function(score) {
+			$('#intro .loandb .credit .result').html('score: ' + score);
+		});
+/*		$('#intro .loandb .credit .result').html('user: ' + userAddr + ' score: ' + ldb.creditScore[userAddr] +
+			'<br />ldb.getCreditScore: ' + ldb.getCreditScore());*/
+	});
+
+	$('#intro .loandb .credit button.set').click(function() {
+		var index = $('#intro .loandb .credit input.user-addr').val();
+
+		ldb.setCreditScore(index, {from:curAcct}).then(function() {
+			$('#intro .loandb .credit .result').html('set score for loan at  ' + index);
+		});
+	});
+
+	$('#intro .loandb .get-b button').click(function() {
+		var index = $('#intro .loandb .get-b input.index').val();
+		ldb.getBorrower(index, {from:curAcct}).then(function(brw) {
+			brw = brw.toString();
+			$('#intro .loandb .get-b .result').html(brw);
 		});
 	});
 

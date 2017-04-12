@@ -27,7 +27,7 @@
 
     <h3>ethel - ethereum p2p lending dapp</h3>
     <p>Under development<br />
-      <a href="https://github.com/cairnx/ethl">https://github.com/cairnx/ethl</a>
+      <a href="https://github.com/cairnx/ethel">https://github.com/cairnx/ethel</a>
     </p>
     <p>Built using the Embark framework. See the <a href="https://github.com/iurimatias/embark-framework/wiki">Wiki</a> to see what you can do with Embark!</p>  
 
@@ -190,21 +190,38 @@
           <!--24.03 changed to have repayable field as well-->
           <!-- going to try to send balance to loan -->
           <!-- going to try and kill loan to get balance back -->
+          <!-- 11.04 added duration -->
           <div class="form-group add">
           	<h4>Add Loan</h4>
           	<p>Enter loan parameters</p>
           	<input class="amt" placeholder="amount" />
           	<input class="rpy" placeholder="repayable" />
+            <input class="duration" placeholder="duration" />
+            <select class="time-unit">
+              <option value="seconds">Seconds</option>
+              <option value="minutes">Minutes</option>
+              <option value="hours">Hours</option>
+              <option value="days">Days</option>
+              <option value="weeks">Weeks</option>
+            </select>
           	<button>Add loan</button>
           	<div class="result"></div>
           </div>
 
           <!-- 10.04 loan request -->
+          <!-- 11.04 added duration -->
           <div class = "form-group rq">
             <h4>Request Loan</h4>
             <p>Enter loan parameters</p>
             <input class="amt" placeholder="amount" />
             <input class="rpy" placeholder="repayable" />
+            <input class="duration" placeholder="duration" />
+            <select  class="time-unit">
+              <option value="seconds">Seconds</option>
+              <option value="hours">Hours</option>
+              <option value="days">Days</option>
+              <option value="weeks">Weeks</option>
+            </select>
             <button>Add request</button>
             <div class="result"></div>
           </div>
@@ -236,10 +253,41 @@
             <div class="result"></div>
           </div>
 
+          <!--11.04 updated - now fully featured -->
           <div class="form-group inspect">
             <h4>Inspect Loan</h4>
             <input placeholder="enter index" />
-            <button>Inspect loan</button>
+            <button class="ins">Inspect loan</button>
+            <button class="clr">Clear results</button>
+            <div class="result"></div>
+          </div>
+
+          <!-- 11.04 set-ldb for loan testing -->
+          <div class="form-group set-ldb">
+            <h4>Set LoanDB for Loan Contract</h4>
+            <input class="index" placeholder="enter loan index" />
+            <input class="loanDBAddr" placeholder="enter ldb address" />
+            <input class="loanAddr" placeholder="enter loan address" />
+            <button class="set">Set LoanDB</button>
+            <button class="get">Get DB address</button>
+            <div class="result"></div>
+          </div>
+
+          <!-- 11.04 credit rating checker -->
+          <!-- when a loan is removed, the credit rating mapping in the LoanDB should be updated -->
+          <div class="form-group credit">
+            <h4>Credit Ratings</h4>
+            <input class="user-addr" placeholder="enter user addr" />
+            <button class="get">Get rating</button>
+            <button class="set">Set rating</button>
+            <div class="result"></div>
+          </div>
+
+          <!-- 11.04 test method -->
+          <div class="form-group get-b">
+            <h4>Get borrower LDB</h4>
+            <input class="index" placeholder="enter ldb index" />
+            <button>Get borrower</button>
             <div class="result"></div>
           </div>
 
@@ -369,6 +417,17 @@
           Credit ratings<br />
           Finish requirements<br />
           Interface cleanup<br />
+        </p>
+
+        <h4>11.04</h4>
+        <p><b>Notes</b></p>
+        <p>
+          Adding maturity
+        </p>
+
+        <p><b>Next Steps</b></p>
+        <p>
+
         </p>
 
         <h3>Documented Experiments</h3>
