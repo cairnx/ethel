@@ -32,13 +32,13 @@
     <p>Built using the Embark framework. See the <a href="https://github.com/iurimatias/embark-framework/wiki">Wiki</a> to see what you can do with Embark!</p>  
 
 		<ul id="tabs-menu-box" class="nav nav-tabs">
-		  <li class="active"><a href="#intro" class="intro">Work area</a></li>
-		  <li><a href="#sand" class="sand">Temp</a></li>
+		  <li><a href="#intro" class="intro">Work area</a></li>
+		  <li class="active"><a href="#ethel" class="ethel">Ethel</a></li>
 		  <li><a href="#worklog" class="worklog">Work log</a></li>
 		</ul>
 
 		<div class="tab-content">
-		  <div class="tab-pane active" id="intro">
+		  <div class="tab-pane" id="intro">
 		   	<h3>The Basic Components</h3>
 
         <ul>
@@ -135,6 +135,7 @@
             <button class="test">Test</button><!-- testing promises and such -->
             <button class="rq">Requests</button><!-- view requests -->
             <div class="result"></div>
+            <div class="rq-result"></div>
           </div>
 
           <div class="form-group take-ln">
@@ -196,6 +197,8 @@
           	<p>Enter loan parameters</p>
           	<input class="amt" placeholder="amount" />
           	<input class="rpy" placeholder="repayable" />
+            <input class="score" placeholder="min credit score" />
+            <br />
             <input class="duration" placeholder="duration" />
             <select class="time-unit">
               <option value="seconds">Seconds</option>
@@ -300,8 +303,179 @@
         </div>	
 		  </div>
 		  
-		  <div class="tab-pane" id="sand">
-		   	<h3>Nothing to see here</h3>
+		  <div class="tab-pane active" id="user">
+		   	<h3>Ethel</h3>
+        <h4>What is Ethel?</h4>
+        <p>Hello. This is a decentralised application on the Ethereum platform which
+        lets you lend and borrow money from other users. This way you don't have to ask
+        your mates to lend you £20 when you're waiting for your student loan to drop,
+        or get ripped off by wonga.com when your car breaks down at the worst possible time.</p>
+        <p>You could also make a bit of spare cash, putting your money to work without investing
+        £1000s in index funds or speculating on the flavour of the month cryptocurrencies.</p>
+        <p>Ethel was developed as part of a Computer Engineering final year project. It's not
+        meant for commercial release, but rather to demonstrate an understanding of Ethereum app development.</p>
+
+        <h4>Getting Started</h4>
+        <p>To start, you'll need to have an Ethereum account with some ether.
+        Luckily, we've got 10 unlocked accounts to play with, each pre-loaded with 100 ether.
+        That's because this demo version of Ethel is running on a simulated Ethereum node using
+        <i>ethereum-testrpc</i>. In real life, we'd be running a full node connected to the Ethereum main network and
+        you'd connect to it. Once connected, you'd use your personal Ethereum accounts and real ether.
+        We didn't want to lose any money by mistake during development, so we're using fake ether.</p>
+        <p>Check accounts and balances <a href="#ls-accts">here</a>.</p>
+
+        <h4>How to use: Lending</h4>
+        <p>
+          <ul>
+            <li>Login <a href="#login">here</a></li>
+            <li>Offer a loan with custom parameters</li>
+            <li>
+              <ul>
+                <li>The amount you're to lend - the principal</li>
+                <li>How much you want to be repaid - the principal plus interest</li>
+                <li>Duration - how long the borrower has to repay</li>
+                <li>The borrower's minimum credit score - more on that <a href=#>here</a></li>
+              </ul>
+            </li>
+            <li>Someone takes your loan</li>
+            <li>They'll either pay it back or they won't - an unavoidable risk in lending</li>
+            <li>When you want to withdraw the repayment, delete the loan</li>
+            <li>This transfers the repayment to your Ethereum account</li>
+            <li>If the loan hasn't been repaid, deleting the loan hurts the borrower's credit score</li>
+          </ul>
+        </p>
+
+        <h4>How to use: Borrowing</h4>
+        <p>
+        </p>
+
+        <hr>
+
+        <!-- display accounts and balances -->
+        <h4 id="ls-accts">Accounts and balances</h4>
+        <div class="form-group ls-accts">
+          <p>Press button to update accounts and balances</p>
+          <button>Update</button>
+          <div class="result"></div>
+        </div>
+
+        <hr>
+
+        <h3>Control panel</h3>
+        <h4 id="login">Log in</h4>
+        <div class="form-group login">
+          <p>Please enter an Ethereum user account. By default you are logged in as <code>web3.eth.defaultAccount</code>.
+          That's the first account on the list above. Logging in with no address achieves the same effect. In real
+          life this wouldn't actually make any sense, because this isn't one of <i>your</i> accounts. This is for demo
+          purposes.</p>
+          <input class="addr" placeholder="enter address" />
+          <button class="login">Log in</button>
+          <button class="clear">Clear</button>
+          <div class="result"></div>
+        </div>
+
+        <h4 id="your-loans">Your loans and requests</h4>
+        <div class="form-group your-loans">
+          <p>
+            Here you can view all the loans that you've given or taken, as well as all of the offers and requests
+            that you've made.
+          </p>
+          <button class="all">Everything</button>
+          <button class="lent">Lent</button>
+          <button class="borrowed">Borrowed</button>
+          <button class="offers">Offers</button>
+          <button class="requests">Requests</button>
+          <div class="result"></div>
+        </div>
+
+        <h4 id="repay-loan">Repay a loan</h4>
+        <div class="form-group repay-loan">
+          <p>
+            Enter the <code>index</code> of the loan you want to repay. If you don't repay before the deadline is up,
+            your credit score will take a hit.
+          </p>
+        </div>
+
+        <hr>
+
+        <h4 id="lend">Lend ETH</h4>
+        <div class="form-group lend">
+          <p>
+            You want to lend some ETH and (hopefully) earn a little interest. You can either view available requests
+            and fill one, or make an offer viewable by all prospective borrowers.
+          </p>
+          <p>
+            The risk of lending is borne entirely by you. If you feel uneasy, avoid lending to users with a low credit score.
+            You can set a minimum required score when making an offer.
+          </p>
+
+          <h4>View requests</h4>
+          <button class="view-rq">View requests</button>
+          <div class="view-rq-result"></div>
+
+          <h4>Fill request</h4>
+          <p>
+            Enter the <code>index</code> of the request you want to fill.
+          </p>
+          <input class="fill-rq-index" placeholder="enter request index" />
+          <button class="fill-rq">Fill request</button>
+          <div class="fill-rq-result"></div>
+
+          <h4>Offer a loan</h4>
+          <p>Enter the parameters for your offer</p>
+          <input class="amt" placeholder="amount to lend" />
+          <input class="rpy" placeholder="repayment amount" />
+          <input class="dur" placeholder="loan duration" />
+          <input class="min-score" placeholder="minimum credit score" />
+          <button class="make-of">Make offer</button>
+          <div class="make-of-result"></div>
+
+        </div>
+
+        <!--
+        view requests
+        fill requests
+        make offer
+        -->
+
+        <hr>
+
+        <h4 id="borrow">Borrow ETH</h4>
+        <div class="form-group borrow">
+          <p>
+            You want to borrow some ETH. You can either view the available offers and take one, or make a request
+            viewable by all prospective lenders.
+          </p>
+          <p>
+            If you fail to pay the loan back before the maturity date/deadline your credit score will take a hit. Lenders
+            have an incentive to avoid borrowers with low scores, so be careful.
+          </p>
+
+          <h4>View offers</h4>
+          <button class="view-of">View offers</button>
+          <div class="view-of-result"></div>
+
+          <h4>Take offer</h4>
+          <p>
+            Enter the <code>index</code> of the request you want to fill.
+          </p>          
+          <button class="take-of">Take offer</button>
+          <div class="take-of-result"></div>
+
+          <h4>Make request</h4>
+          <input class="amt" placeholder="amount to lend" />
+          <input class="rpy" placeholder="repayment amount" />
+          <input class="dur" placeholder="loan duration" />
+          <button class="make-rq">Make request</button>
+          <div  class="make-rq-result"></div>
+
+        <!--
+        view offers
+        take offers
+        make request
+        -->
+        </div> <!-- end borrow ETH -->
+
 		  </div>
 
 		  <!--Worklog tabpane -->
@@ -435,6 +609,19 @@
           avoid risky users<br />
           After this, clean up the code, making the interface nice and usable<br />
           Then dedicate all time to completing the report
+        </p>
+
+        <h4>12.04</h4>
+        <p><b>Notes</b></p>
+        <p>
+          Credit ratings and maturity implemented fully
+        </p>
+
+        <p><b>Next Steps</b></p>
+        <p>
+          Document credit ratings - experiment<br />
+          Clean up interface - underway<br />
+          Dissertation - first step requirements<br />
         </p>
 
         <h3>Documented Experiments</h3>
