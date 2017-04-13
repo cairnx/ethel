@@ -25,7 +25,7 @@ contract Loan is Mortal {
 	LoanDB ldb; //11.04
 
   //constructor
-	function Loan(uint _amt, uint _rpy, bool _request, uint _duration, int _minScore, address dbAddr) payable {
+	function Loan(uint _amt, uint _rpy, uint _duration, int _minScore, bool _request, address dbAddr) payable {
 		taken = false;  //initialised loan has not been taken
 		repaid = false;  //initialised loan has not been repaid
 		amt = _amt;  //loan amount

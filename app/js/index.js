@@ -981,19 +981,14 @@ $(document).ready(function() {
 		return web3.fromWei(web3.eth.getBalance(addr));
 	}
 
-	function displayLoginInfo(addr) {
-		$('#user .login .result').html('Currently logged in as: <code>' + curAcct + '</code>' +
-			'<br />Account balance: ' + getEtherBalance(addr) + ' ETH');
-	}
-
 	//12.04 function => get web3.eth.defaultAccount and display it
 	//#########incomplete
-	function getDefaultAccount() {
+	function displayLoginInfo() {
 		if (curAcct == "") {
 			curAcct = web3.eth.defaultAccount;
 		}
-		//$('#user .login .result').html('Currently logged in as: ' + curAcct);
-		displayLoginInfo(curAcct);
+		$('#user .login .result').html('Currently logged in as: <code>' + curAcct + '</code>' +
+			'<br />Account balance: ' + getEtherBalance(curAcct) + ' ETH');
 	}	
 
   function foo() {
@@ -1005,7 +1000,7 @@ $(document).ready(function() {
 	//*****************************
 
 	lsAccts();	//ls accounts and balances
-	getDefaultAccount();	//log in and display accounts[0]
+	displayLoginInfo();	//log in and display accounts[0]
 
 	//*****************************
 	//****** button handlers ******
@@ -1026,18 +1021,17 @@ $(document).ready(function() {
 	//Login on Ethel screen - no validation to check address format/length yet
 	$('#user .login button.login').click(function() {
 	  curAcct = $('#user .login .addr').val();
-		if (curAcct === "") {  //if current account is not loaded in JS
-			curAcct = web3.eth.defaultAccount;  //get accounts[0] / defaultAccount
-		}
-		$('#user .login .result').html('Logged in as: ' + curAcct +
-			'<br />Account balance: ' + getEtherBalance(curAcct)
-			);
+		displayLoginInfo();
 	});
 
 	//12.04 - Clear login
 	$('#user .login button.clear').click(function() {
 		$('#user .login .addr').val('');
 	});
+
+	//++++++++++++++++++++++++++++
+	//13.04 ++++ User CP +++++++++
+	//++++++++++++++++++++++++++++
 
 	//13.04 - View all loans and offers for this user
 
@@ -1049,9 +1043,98 @@ $(document).ready(function() {
 
 	//13.04 - View all loan requests from this user
 
-	//13.04 - Lend ETH
 
-	//13.04 - Borrow ETH
+	//++++++++++++++++++++++++++++
+	//13.04 ++++ Lend ETH ++++++++
+	//++++++++++++++++++++++++++++
+
+	//13.04 - Lend ETH - view requests
+
+	//13.04 - Lend ETH - fill request
+
+	//13.04 - Lend ETH - make offer
+	$('#user .lend button.make-of').click(function() {
+		var amt = $('#user .lend input.amt').val();
+		var rpy = $('#user .lend input.rpy').val();
+		var minScore = $('#user .lend input.min-score').val();
+		var dur = $('#user .lend input.dur').val();
+
+		var amtWei = web3.toWei(amt, 'ether');
+		var rpyWei = web3.toWei(rpy, 'ether');
+
+		//deploy params: amount, repayment, duration, minScore, isRequest, dbAddr
+		Loan.deploy([amtWei, rpyWei, dur, minScore, false, dbAddr], {from:curAcct})
+		.then(function(deployedLoan) {
+			ldb.addLoan(deployedLoan.address).then(function() {
+				web3.eth.sendTransaction({from:curAcct, to: deployedLoan.address, value: amtWei});
+				//var bal = getEtherBalance(deployedLoan.address);
+				$('#user .lend .make-of-result').html(
+					'Loan offer created successfully' +
+					'<br />Amount: ' + amt + ' ETH' +
+					'<br />Repayment: ' + rpy + ' ETH' +
+					'<br />Duration: ' + dur + ' days' +
+					'<br />Minimum credit score: ' + minScore +
+					'<br />Address: <code>' + deployedLoan.address + '</code>'
+					);
+			});
+		});
+	});
+
+	//13.04 - Lend ETH - clear make offer text input boxes
+	$('#user .lend button.clear').click(function() {
+		$('#user .lend input').val('');
+	});
+
+	//++++++++++++++++++++++++++++
+	//13.04 ++ Borrow ETH ++++++++
+	//++++++++++++++++++++++++++++
+
+	//13.04 - Borrow ETH - view offers
+	$('#user .borrow button.view-of').click(function() {
+		//first get the array length
+		ldb.getLen({from:curAcct}).then(function(len) {
+			if (len == 0 ) {  //if no loans in ldb
+				$('#user .borrow .view-of-result').html('No loans in database');
+			}
+			else {
+				$('#user .borrow .view-of-result').html('');  //reset output
+				for (var i = 0; i < len; i++) {		//iterate over array in JS not in solidity to contract out of gas
+					(function (i) {									//js closure
+						ldb.getLoan(i, {from:curAcct}).then(function(addr) {		//get loan at loop index i
+							curLoan = new EmbarkJS.Contract({
+								abi: Loan.abi,
+								address: addr
+							});
+							Promise.all([	//get all the loan data
+								curLoan.taken().then(function(tkn) {return tkn;}),  //0 taken/avail
+								curLoan.request().then(function(rq) {return rq;}),		//1 request/offer
+								curLoan.amt().then(function(amt) {return web3.fromWei(amt, 'ether'); }), //2 loan amount in ether
+								curLoan.rpy().then(function(rpy) {return web3.fromWei(rpy, 'ether'); }), //3 repayment amt in ether
+								curLoan.duration().then(function(dur) {return dur;}),		//4 loan duration in days
+								curLoan.minScore().then(function(minScore) {return minScore;}),  //5 min borrower credit score
+								]).then(function(values){
+										if (!values[0] && !values[1]) {		//if loan is avail and is offer
+											//output loan params
+											var interest = (parseInt(values[3]) - parseInt(values[2])) / parseInt(values[2]) * 100;
+											$('#user .borrow .view-of-result').append(i + ': ' +  //index
+												' Borrow ' + values[2]  + ' ETH // Repay ' + values[3] + ' ETH // ' + values[4] +
+												' days // Interest ' + interest + '% // Minimum score ' + values[5] + '<br />');
+										}
+										else {
+											var numAvail = (len + 1) - (i + 1);;
+											$('#user .borrow .total-of').html(numAvail + ' offers found');
+										}
+									}).catch('Promise.all rejection');
+						});
+					})(i);
+				}
+			}
+		});
+	});
+
+	//13.04 - Borrow ETH - take offer
+
+	//13.04 - Borrow ETH - make request
 
 
 	//## marked for deletion 12.04 #############x`
