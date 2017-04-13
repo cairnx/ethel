@@ -982,18 +982,42 @@ $(document).ready(function() {
 	}
 
 	//12.04 function => get web3.eth.defaultAccount and display it
-	//#########incomplete
 	function displayLoginInfo() {
 		if (curAcct == "") {
 			curAcct = web3.eth.defaultAccount;
 		}
 		$('#user .login .result').html('Currently logged in as: <code>' + curAcct + '</code>' +
-			'<br />Account balance: ' + getEtherBalance(curAcct) + ' ETH');
+			'<br />Account balance: ' + getEtherBalance(curAcct) + ' ETH' +
+			'<br />Credit score: ');
+		ldb.getCreditScore(curAcct).then(function(score) { 
+		  $('#user .login .result').append(score.toNumber())
+	  });
 	}	
 
   function foo() {
   	alert('bar');
   };
+
+  //helper functions for promises
+  function takenPromise(curLoan) {return curLoan.taken({from:curAcct}).then(function(tkn) {return tkn;});}
+
+  function requestPromise(curLoan) {return curLoan.request({from:curAcct}).then(function(rq) {return rq;});}
+
+  function amtPromise(curLoan) {return curLoan.amt({from:curAcct}).then(function(amt) {return web3.fromWei(amt, 'ether');});}
+
+  function rpyPromise(curLoan) {return curLoan.rpy({from:curAcct}).then(function(rpy)
+  	{return web3.fromWei(rpy, 'ether');});}
+
+  function durPromise(curLoan) {return curLoan.duration({from:curAcct}).then(function(dur) {return dur;});}
+
+  function minScorePromise(curLoan) {return curLoan.minScore({from:curAcct}).then(function(minScore) {return minScore;});}
+
+  function borrowerPromise(curLoan) {return curLoan.borrower({from:curAcct}).then(function(brw) {return brw;});}
+
+  function ownerPromise(curLoan) {return curLoan.owner({from:curAcct}).then(function(owner) {return owner.toString();});}
+
+  function borrowerScorePromise(curLoan) {return curLoan.getCreditScore({from:curAcct}).then(function(score)
+  	{return parseInt(score);});}
 
   //*****************************
 	//******* docment.ready *******
@@ -1003,7 +1027,7 @@ $(document).ready(function() {
 	displayLoginInfo();	//log in and display accounts[0]
 
 	//*****************************
-	//****** button handlers ******
+	//****** misc   handlers ******
 	//*****************************
 
 	//12.04 - accounts and balances button handler
@@ -1040,8 +1064,82 @@ $(document).ready(function() {
 	//13.04 - View all loans taken by this user
 
 	//13.04 - View all loan offers from this user
+	$('#user .cp button.offers').click(function() {
+		ldb.getLen({from:curAcct}).then(function(len) {
+			if (len == 0 ) {  //if no loans in ldb
+				$('#user .cp .result').html('No loans in database');
+			}
+			else {
+				$('#user .cp .result').html('Your loan offers: <br />');  //reset output
+				for (var i = 0; i < len; i++) {		//iterate over array in JS not in solidity to contract out of gas
+					(function (i) {									//js closure
+						ldb.getLoan(i, {from:curAcct}).then(function(addr) {		//get loan at loop index i
+							curLoan = new EmbarkJS.Contract({
+								abi: Loan.abi,
+								address: addr
+							});
+							Promise.all([	//get all the loan data
+								takenPromise(curLoan),  //0 taken/avail
+								requestPromise(curLoan),  //1 request/offer
+								amtPromise(curLoan),  //2 amount ether
+								rpyPromise(curLoan),  //3 repayment ether
+								durPromise(curLoan),  //4 duration days
+								minScorePromise(curLoan),  //5 minimum score
+								ownerPromise(curLoan)  //6 owner
+								]).then(function(values){
+										if (!values[0] && !values[1] && values[6] == curAcct) {		//if loan is avail and is offer
+											//and belongs to logged in user
+											//output loan params
+											var interest = (parseInt(values[3]) - parseInt(values[2])) / parseInt(values[2]) * 100;
+											$('#user .cp .result').append(i + ': ' +  //index
+												' Borrow ' + values[2]  + ' ETH // Repay ' + values[3] + ' ETH // ' + values[4] +
+												' days // Interest: ' + interest + '% // Minimum score ' + values[5] + '<br />');
+										}
+									}).catch('Promise.all rejection');
+						});
+					})(i);
+				}
+			}
+		});
+	});
 
 	//13.04 - View all loan requests from this user
+	$('#user .cp button.requests').click(function() {
+		ldb.getLen({from:curAcct}).then(function(len) {
+			if (len == 0 ) {  //if no loans in ldb
+				$('#user .cp .result').html('No loans in database');
+			}
+			else {
+				$('#user .cp .result').html('Your loan requests: <br />');  //reset output
+				for (var i = 0; i < len; i++) {		//iterate over array in JS not in solidity to contract out of gas
+					(function (i) {									//js closure
+						ldb.getLoan(i, {from:curAcct}).then(function(addr) {		//get loan at loop index i
+							curLoan = new EmbarkJS.Contract({
+								abi: Loan.abi,
+								address: addr
+							});
+							Promise.all([	//get all the loan data
+								takenPromise(curLoan),  //0 taken/avail
+								requestPromise(curLoan),  //1 request/offer
+								amtPromise(curLoan),  //2 amount ether
+								rpyPromise(curLoan),  //3 repayment ether
+								durPromise(curLoan),  //4 duration days
+								ownerPromise(curLoan)  //6 owner
+								]).then(function(values){
+										if (values[1] && values[5] == curAcct) {		//if loan is request and owned by logged in user
+											//output loan params
+											var interest = (parseInt(values[3]) - parseInt(values[2])) / parseInt(values[2]) * 100;
+											$('#user .cp .result').append(i + ': ' +  //index
+												' Borrow ' + values[2]  + ' ETH // Repay ' + values[3] + ' ETH // ' + values[4] +
+												' days // Interest: ' + interest + '% <br />');
+										}
+									}).catch('Promise.all rejection');
+						});
+					})(i);
+				}
+			}
+		});
+	});	
 
 
 	//++++++++++++++++++++++++++++
@@ -1049,6 +1147,49 @@ $(document).ready(function() {
 	//++++++++++++++++++++++++++++
 
 	//13.04 - Lend ETH - view requests
+	$('#user .lend button.view-rq').click(function() {
+		//first get the array length
+		ldb.getLen({from:curAcct}).then(function(len) {
+			if (len == 0 ) {  //if no loans in ldb
+				$('#user .lend .view-rq-result').html('No loans in database');
+			}
+			else {
+				$('#user .lend .view-rq-result').html('Available requests: <br />');  //reset output
+				for (var i = 0; i < len; i++) {		//iterate over array in JS not in solidity to contract out of gas
+					(function (i) {									//js closure
+						ldb.getLoan(i, {from:curAcct}).then(function(addr) {		//get loan at loop index i
+							curLoan = new EmbarkJS.Contract({
+								abi: Loan.abi,
+								address: addr
+							});
+
+							Promise.all([	//get all the loan data
+								takenPromise(curLoan),  //0 taken/avail
+								requestPromise(curLoan),		//1 request/offer
+								amtPromise(curLoan), //2 loan amount in ether
+								rpyPromise(curLoan), //3 repayment amt in ether
+								durPromise(curLoan),		//4 loan duration in days
+								//borrowerScorePromise(curAcct) //5 borrower/requester credit score
+								borrowerScorePromise(curLoan) //5 borrower/requester credit score
+								]).then(function(values){
+										if (values[1]) {		//if loan is REQUEST
+											//output loan params
+											var interest = (parseInt(values[3]) - parseInt(values[2])) / parseInt(values[2]) * 100;
+											$('#user .lend .view-rq-result').append(i + ': ' +  //index
+												' Borrow ' + values[2]  + ' ETH // Repay ' + values[3] + ' ETH // ' + values[4] +
+												' days // Interest: ' + interest + '% // Requester credit score: ' + values[5] + '<br />');
+										}
+										else { //note implemented yet on front-end
+											var numAvail = (len + 1) - (i + 1);;
+											$('#user .lend .total-rq').html(numAvail + ' requests found');
+										}
+									}).catch('Promise.all rejection');
+						});
+					})(i);
+				}
+			}
+		});
+	});	
 
 	//13.04 - Lend ETH - fill request
 
@@ -1097,7 +1238,7 @@ $(document).ready(function() {
 				$('#user .borrow .view-of-result').html('No loans in database');
 			}
 			else {
-				$('#user .borrow .view-of-result').html('');  //reset output
+				$('#user .borrow .view-of-result').html('Available offers: <br />');  //reset output
 				for (var i = 0; i < len; i++) {		//iterate over array in JS not in solidity to contract out of gas
 					(function (i) {									//js closure
 						ldb.getLoan(i, {from:curAcct}).then(function(addr) {		//get loan at loop index i
@@ -1105,25 +1246,27 @@ $(document).ready(function() {
 								abi: Loan.abi,
 								address: addr
 							});
+
 							Promise.all([	//get all the loan data
-								curLoan.taken().then(function(tkn) {return tkn;}),  //0 taken/avail
-								curLoan.request().then(function(rq) {return rq;}),		//1 request/offer
-								curLoan.amt().then(function(amt) {return web3.fromWei(amt, 'ether'); }), //2 loan amount in ether
-								curLoan.rpy().then(function(rpy) {return web3.fromWei(rpy, 'ether'); }), //3 repayment amt in ether
-								curLoan.duration().then(function(dur) {return dur;}),		//4 loan duration in days
-								curLoan.minScore().then(function(minScore) {return minScore;}),  //5 min borrower credit score
+								takenPromise(curLoan),  //0 taken/avail
+								requestPromise(curLoan),		//1 request/offer
+								amtPromise(curLoan), //2 loan amount in ether
+								rpyPromise(curLoan), //3 repayment amt in ether
+								durPromise(curLoan),		//4 loan duration in days
+								minScorePromise(curLoan)  //5 min borrower credit score
 								]).then(function(values){
 										if (!values[0] && !values[1]) {		//if loan is avail and is offer
 											//output loan params
 											var interest = (parseInt(values[3]) - parseInt(values[2])) / parseInt(values[2]) * 100;
 											$('#user .borrow .view-of-result').append(i + ': ' +  //index
 												' Borrow ' + values[2]  + ' ETH // Repay ' + values[3] + ' ETH // ' + values[4] +
-												' days // Interest ' + interest + '% // Minimum score ' + values[5] + '<br />');
+												' days // Interest: ' + interest + '% // Minimum credit score: ' + values[5] + '<br />');
 										}
-										else {
-											var numAvail = (len + 1) - (i + 1);;
-											$('#user .borrow .total-of').html(numAvail + ' offers found');
-										}
+/*										else {
+											//var numAvail = (len + 1) - (i + 1);
+											$('#user .borrow .total-of').html(len + ' loans in database<br />' +
+												'');
+										}*/
 									}).catch('Promise.all rejection');
 						});
 					})(i);
@@ -1135,6 +1278,34 @@ $(document).ready(function() {
 	//13.04 - Borrow ETH - take offer
 
 	//13.04 - Borrow ETH - make request
+	$('#user .borrow button.make-rq').click(function() {
+		var amt = $('#user .borrow input.amt').val();
+		var rpy = $('#user .borrow input.rpy').val();
+		var dur = $('#user .lend input.dur').val();
+
+		var amtWei = web3.toWei(amt, 'ether');
+		var rpyWei = web3.toWei(rpy, 'ether');
+
+		//deploy params: amount, repayment, duration, minScore, isRequest, dbAddr
+		Loan.deploy([amtWei, rpyWei, dur, 0, true, dbAddr], {from:curAcct})
+		.then(function(deployedLoan) {
+			ldb.addLoan(deployedLoan.address).then(function() {
+				//var bal = getEtherBalance(deployedLoan.address);
+				$('#user .borrow .make-rq-result').html(
+					'Loan request created successfully' +
+					'<br />Amount: ' + amt + ' ETH' +
+					'<br />Repayment: ' + rpy + ' ETH' +
+					'<br />Duration: ' + dur + ' days' +
+					'<br />Minimum credit score: N/A' +
+					'<br />Address: <code>' + deployedLoan.address + '</code>'
+					);
+			});
+		});
+	});
+
+	$('#user .borrow button.clear').click(function() {
+		$('#user .borrow input').val('');
+	});
 
 
 	//## marked for deletion 12.04 #############x`
