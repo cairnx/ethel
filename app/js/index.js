@@ -986,7 +986,8 @@ $(document).ready(function() {
 		if (curAcct == "") {
 			curAcct = web3.eth.defaultAccount;
 		}
-		$('#user .login .result').html('Currently logged in as: <code>' + curAcct + '</code>' +
+		$('#user .login .result').html('<b>Your account info</b> <br />' +
+			'Currently logged in as: <code>' + curAcct + '</code>' +
 			'<br />Account balance: ' + getEtherBalance(curAcct) + ' ETH' +
 			'<br />Credit score: ');
 		ldb.getCreditScore(curAcct).then(function(score) { 
@@ -999,28 +1000,31 @@ $(document).ready(function() {
   };
 
   //helper functions for promises
-  function takenPromise(curLoan) {return curLoan.taken({from:curAcct}).then(function(tkn) {return tkn;});}
+  function takenPromise(curLoan) {return curLoan.taken({from:curAcct}).then(function(tkn) {return tkn;})}
 
-  function requestPromise(curLoan) {return curLoan.request({from:curAcct}).then(function(rq) {return rq;});}
+  function requestPromise(curLoan) {return curLoan.request({from:curAcct}).then(function(rq) {return rq;})}
 
-  function amtPromise(curLoan) {return curLoan.amt({from:curAcct}).then(function(amt) {return web3.fromWei(amt, 'ether');});}
+  function amtPromise(curLoan) {return curLoan.amt({from:curAcct}).then(function(amt) {return web3.fromWei(amt, 'ether');})}
 
   function rpyPromise(curLoan) {return curLoan.rpy({from:curAcct}).then(function(rpy)
-  	{return web3.fromWei(rpy, 'ether');});}
+  	{return web3.fromWei(rpy, 'ether');})}
 
-  function durPromise(curLoan) {return curLoan.duration({from:curAcct}).then(function(dur) {return dur;});}
+  function durPromise(curLoan) {return curLoan.duration({from:curAcct}).then(function(dur) {return dur;})}
 
-  function minScorePromise(curLoan) {return curLoan.minScore({from:curAcct}).then(function(minScore) {return minScore;});}
+  function minScorePromise(curLoan) {return curLoan.minScore({from:curAcct}).then(function(minScore) {return minScore;})}
 
-  function borrowerPromise(curLoan) {return curLoan.borrower({from:curAcct}).then(function(brw) {return brw;});}
+  function borrowerPromise(curLoan) {return curLoan.borrower({from:curAcct}).then(function(brw) {return brw;})}
 
-  function ownerPromise(curLoan) {return curLoan.owner({from:curAcct}).then(function(owner) {return owner.toString();});}
+  function ownerPromise(curLoan) {return curLoan.owner({from:curAcct}).then(function(owner) {return owner.toString();})}
 
   function borrowerScorePromise(curLoan) {return curLoan.getCreditScore({from:curAcct}).then(function(score)
-  	{return parseInt(score);});}
+  	{return parseInt(score);})}
 
   function deadlinePromise(curLoan) {return curLoan.deadline({from:curAcct}).then(function(deadline)
-  	{return formatDate(deadline);});}
+  	{return formatDate(deadline);})}
+
+  function repaidPromise(curLoan) {return curLoan.repaid({from:curAcct}).then(function(repaid)
+  	{return repaid;})}
 
   //*****************************
 	//******* docment.ready *******
@@ -1067,7 +1071,7 @@ $(document).ready(function() {
 				$('#user .cp .result').html('No loans in database');
 			}
 			else {
-				$('#user .cp .result').html('All loans lent, loans taken, requests and offers: <br />');  //reset output
+				$('#user .cp .result').html('<b>All loans lent, loans taken, requests and offers:</b> <br />');  //reset output
 				for (var i = 0; i < len; i++) {		//iterate over array in JS not in solidity to contract out of gas
 					(function (i) {									//js closure
 						ldb.getLoan(i, {from:curAcct}).then(function(addr) {		//get loan at loop index i
@@ -1083,33 +1087,40 @@ $(document).ready(function() {
 								durPromise(curLoan),  //4 duration days
 								ownerPromise(curLoan),  //5 owner
 								borrowerPromise(curLoan),	//6 borrower
-								deadlinePromise(curLoan)	//7 deadline
+								deadlinePromise(curLoan),	//7 deadline
+								repaidPromise(curLoan)		//8 repaid true/false
 								]).then(function(values){
 									var displayToUser = false;
 									var typeString = '';
 										if (values[0] && values[5] == curAcct) {	//taken = true, owner = lender = cur
 											typeString = '<b>LENT</b> Lent';
 											values[6] = '<code>' + values[6] + '</code>';
-											values[5] = 'N/A';
+											values[5] = '<code>' + values[5] + '</code>';
 											displayToUser = true;
+											if (values[8]) { values[8] = " // <font color='green'><b>REPAID</b></font>"; }
+											else if (!values[8]) { values[8] = " // <font color='crimson'><b>AWATING REPAYMENT</b></font>"; }
 										}
 										else if (values[0] && values[6] == curAcct) {
 											typeString = '<b>TAKEN</b> Borrowed';
-											values[6] = 'N/A';
+											values[6] = '<code>' + values[6] + '</code>';
 											values[5] = '<code>' + values[5] + '</code>';
 											displayToUser = true;
+											if (values[8]) { values[8] = " // <font color='green'><b>REPAID</b></font>"; }
+											else if (!values[8]) { values[8] = " // <font color='crimson'><b>UNPAID</b></font>"; }
 										}
 										else if (!values[0] && !values[1] && values[5] == curAcct) {
 											typeString = '<b>OFFER</b> Offering';
-											values[7] = 'N/A';
+											values[7] = 'N/A';				//7 deadline n/a
 											values[6] = 'N/A';				//borrower N/A for offer
 											displayToUser = true;
+											values[8] = '';						//8 repaid n/a
 										}
 										else if (!values[0] && values[1] && values[5] == curAcct) { //if avail & request & owner
 											typeString = '<b>REQUEST</b> Requesting';
-											values[7] = 'N/A';
+											values[7] = 'N/A';				//7 deadline n/a
 											values[6] = 'N/A';				//borrower N/A for viewing own requests
 											displayToUser = true;
+											values[8] = '';						//8 repaid n/a
 										}
 										else if (values[5] == curAcct || values[6] == curAcct) {
 											typeString = '<b>ERROR UNKNOWN TYPE</b>';
@@ -1119,7 +1130,7 @@ $(document).ready(function() {
 											var interest = (parseInt(values[3]) - parseInt(values[2])) / parseInt(values[2]) * 100;
 											$('#user .cp .result').append(i + ': ' +  typeString + ' // ' +
 												values[2]  + ' ETH // Repay ' + values[3] + ' ETH // ' + values[4] +
-												' days // Interest: ' + interest + '% // Deadline: ' + values[7] + '<br />' +
+												' days // Interest: ' + interest + '% // Deadline: ' + values[7] + values[8] + '<br />' +
 												'Owner: ' + values[5] + '<br />' +
 												'Borrower: ' + values[6] + '<br />');
 										}
@@ -1138,7 +1149,7 @@ $(document).ready(function() {
 				$('#user .cp .result').html('No loans in database');
 			}
 			else {
-				$('#user .cp .result').html('Loans you\'ve lent: <br />');  //reset output
+				$('#user .cp .result').html('<b>Loans you\'ve lent:</b> <br />');  //reset output
 				for (var i = 0; i < len; i++) {		//iterate over array in JS not in solidity to contract out of gas
 					(function (i) {									//js closure
 						ldb.getLoan(i, {from:curAcct}).then(function(addr) {		//get loan at loop index i
@@ -1154,15 +1165,18 @@ $(document).ready(function() {
 								durPromise(curLoan),  //4 duration days
 								ownerPromise(curLoan),  //5 owner
 								deadlinePromise(curLoan),	//6 deadline
-								borrowerPromise(curLoan)	//7 borrower
+								borrowerPromise(curLoan),	//7 borrower
+								repaidPromise(curLoan)		//8 repaid true/false
 								]).then(function(values){
+										if (values[8]) { values[8] = " // <font color = 'green'><b>PAID</b></font>"; }
+											else { values[8] = " // <font color='crimson'><b>AWAITING REPAYMENT</b></font>"; }
 										if (values[0] && values[5] == curAcct) {		//if loan is taken and user is owner
 											//and belongs to logged in user
 											//output loan params
 											var interest = (parseInt(values[3]) - parseInt(values[2])) / parseInt(values[2]) * 100;
 											$('#user .cp .result').append(i + ': ' +  //index
 												' <b>LENT</b> // Lent ' + values[2]  + ' ETH // Repayment ' + values[3] + ' ETH // ' + values[4] +
-												' days // Interest: ' + interest + '% // Deadline: ' + values[6] + 
+												' days // Interest: ' + interest + '% // Deadline: ' + values[6] + values[8] + 
 												//'<br />Owner: <code>' + values[5] + '</code>' +
 												'<br />Borrower: <code>' + values[7] + '</code><br />');
 										}
@@ -1197,19 +1211,22 @@ $(document).ready(function() {
 								durPromise(curLoan),  //4 duration days
 								borrowerPromise(curLoan),  //5 borrower
 								deadlinePromise(curLoan),	//6 deadline
-								ownerPromise(curLoan)		//7 owner
+								ownerPromise(curLoan),		//7 owner
+								repaidPromise(curLoan)		//8 repaid true/false
 								]).then(function(values){
-										if (values[0] && values[5] == curAcct) {		//if loan is taken and user is borrower
-											//and belongs to logged in user
-											//output loan params
-											var interest = (parseInt(values[3]) - parseInt(values[2])) / parseInt(values[2]) * 100;
-											$('#user .cp .result').append(i + ': ' +  //index
-												' <b>TAKEN</b> // Borrowed // ' + values[2]  + ' ETH // Repay ' + values[3] +
-												' ETH // ' + values[4] + ' days // Interest: ' + interest +
-												'% // Deadline: ' + values[6] +
-												'<br />Lender: <code>' + values[7] + '</code><br />' );
-										}
-									}).catch('Promise.all rejection');
+									if (values[8]) { values[8] = "<font color='green'><b>REPAID</b></font>"; }
+										else { values[8] = "<font color='crimson'><b>UNPAID</b></font>"; }
+									if (values[0] && values[5] == curAcct) {		//if loan is taken and user is borrower
+										//and belongs to logged in user
+										//output loan params
+										var interest = (parseInt(values[3]) - parseInt(values[2])) / parseInt(values[2]) * 100;
+										$('#user .cp .result').append(i + ': ' +  //index
+											' <b>TAKEN</b> // Borrowed ' + values[2]  + ' ETH // Repay ' + values[3] +
+											' ETH // ' + values[4] + ' days // Interest: ' + interest +
+											'% // Deadline: ' + values[6] + ' // ' + values[8] +
+											'<br />Lender: <code>' + values[7] + '</code><br />' );
+									}
+								}).catch('Promise.all rejection');
 						});
 					})(i);
 				}
@@ -1295,6 +1312,62 @@ $(document).ready(function() {
 		});
 	});	
 
+	//14.04 User CP - Repay loan
+	$('#user .repay-loan button.repay').click(function() {
+		var index = parseInt($('#user .repay-loan input.index').val());
+
+		if(isNaN(index) || index < 0) {
+			$('#user .repay-loan .result').html('<b>ERROR: Invalid index</b>');
+		}
+		else {
+
+			ldb.getLoan(index, {from:curAcct}).then(function(addr) {
+				curLoan = new EmbarkJS.Contract({
+					abi: Loan.abi,
+					address: addr
+				});
+
+				Promise.all([												//values
+					rpyPromise(curLoan),							//0 rpy
+					borrowerPromise(curLoan),					//1 borrower
+					amtPromise(curLoan),							//2 amt
+					repaidPromise(curLoan),						//3 is repaid true/false
+					ownerPromise(curLoan)							//4 owner/lender
+					]).then(function(values) {
+						if(values[3]) {
+							$('#user .repay-loan .result').html('<b>ERROR:</b> this loan has already been repaid');
+						}
+						else if (values[0] > parseFloat(web3.fromWei(web3.eth.getBalance(curAcct), 'ether'))){
+							$('#user .repay-loan .result').html('<b>ERROR:</b> you don\'t have enough ETH' +
+								'<br />Repayment amount: ' + web3.fromWei(values[0],'ether') +
+								'<br />Your account balance: ' + getEtherBalance(curAcct)
+								);
+						}
+						else if (values[1] != curAcct) {
+							$('#user .repay-loan .result').html('<b>ERROR:</b> you aren\'t the borrower for this loan');
+						}
+						else {
+							curLoan.repay({from: curAcct, value: web3.toWei(values[0], 'ether')}).then(function() {
+								$('#user .repay-loan .result').html('<b>Successfully repaid loan</b>' +
+									'<br />Repaid ' + web3.toWei(values[0], 'ether') + ' ETH' + 
+									'<br />Loan: <code>' + addr + '</code>' + 
+									'<br />Borrower: <code>' + values[1] + '</code>' +
+									'<br />Lender: <code>' +  values[4] + '</code>' +
+									'<br />Loan: <code>' + addr + '</code>'
+									);
+							});
+						}
+					});
+			});
+		}
+		lsAccts();
+	});
+
+	//14.04 USER CP - Remove loan - Withdraw repayment
+	$('#user .rm-loan button').click(function() {
+		foo();
+	});
+
 
 	//++++++++++++++++++++++++++++
 	//13.04 ++++ Lend ETH ++++++++
@@ -1377,6 +1450,7 @@ $(document).ready(function() {
 					}
 				});
 		});
+		lsAccts();
 	});
 
 	//13.04 - Lend ETH - make offer
@@ -1405,6 +1479,7 @@ $(document).ready(function() {
 					);
 			});
 		});
+		lsAccts();
 	});
 
 	//13.04 - Lend ETH - clear make offer text input boxes
@@ -1456,6 +1531,7 @@ $(document).ready(function() {
 		});
 	});
 
+	//14.04 - Borrow ETH - take loan offer
 	$('#user .borrow button.take-of').click(function() {
 		var index = $('#user .borrow input.index').val();
 		//alert(index);
@@ -1511,6 +1587,7 @@ $(document).ready(function() {
 				}
 			});
 		});
+		lsAccts();
 	});
 
 	//13.04 - Borrow ETH - make request
@@ -1537,6 +1614,7 @@ $(document).ready(function() {
 					);
 			});
 		});
+		lsAccts();
 	});
 
 	$('#user .borrow button.clear').click(function() {
