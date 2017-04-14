@@ -324,6 +324,7 @@
         We didn't want to lose any money by mistake during development, so we're using fake ether.</p>
         <p>Check accounts and balances <a href="#ls-accts">here</a>.</p>
 
+<!--
         <h4>How to use: Lending</h4>
         <p>
           <ul>
@@ -348,6 +349,7 @@
         <h4>How to use: Borrowing</h4>
         <p>
         </p>
+        -->
 
         <hr>
 
@@ -382,7 +384,7 @@
           </p>
           <button class="all">Everything</button>
           <button class="lent">Lent</button>
-          <button class="borrowed">Borrowed</button>
+          <button class="taken">Taken</button>
           <button class="offers">Offers</button>
           <button class="requests">Requests</button>
           <div class="result"></div>
@@ -394,6 +396,20 @@
             Enter the <code>index</code> of the loan you want to repay. If you don't repay before the deadline is up,
             your credit score will take a hit.
           </p>
+          <input class="index" placeholder="enter loan index" />
+          <button class="repay">Repay loan</button>
+          <div class="result"></div>
+        </div>
+
+        <h4 id="rm-loan">Remove loan/Withdraw repayment</h4>
+        <div class="form-group rm-loan">
+          <p>
+            Enter the <code>index</code> of the loan you want to remove. You must be the owner of the loan. Any funds will
+            be transferred to your user account. This is how you collect repayments.
+          </p>
+          <input class="index" placeholder="enter loan index" />
+          <button>Remove loan</button>
+          <div class="result"></div>
         </div>
 
         <hr>
@@ -460,7 +476,8 @@
           <h4>Take offer</h4>
           <p>
             Enter the <code>index</code> of the request you want to fill.
-          </p>          
+          </p>
+          <input class="index" placeholder="enter loan index" />
           <button class="take-of">Take offer</button>
           <div class="take-of-result"></div>
 
@@ -625,6 +642,20 @@
           Document credit ratings - experiment<br />
           Clean up interface - underway<br />
           Dissertation - first step requirements<br />
+        </p>
+
+        <h4>13.04<</h4>
+        <p><b>Notes</b></p>
+        <p>
+          Clean up well underway<br />
+          Need to re-implement removing/withdrawal, taking offers and filling requests<br />
+        </p>
+
+        <p><b>Next Steps</b></p>
+        <p>
+          Finish clean up<br />
+          Admin panel<br />
+          Dissertation<br />
         </p>
 
         <h3>Documented Experiments</h3>
