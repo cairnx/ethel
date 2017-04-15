@@ -57,21 +57,26 @@ contract LoanDB {
 	}
 
 	function rmLoan(uint n) {
-		if (loans.length <=0 || n > loans.length) {
-			return;
-		}
-		else if (loans.length == 1) {
-			if (n == 0) {
-				setCreditScore(n);
-				delete loans[n];
-				loans.length--;
+		address loanAddr = loans[n];
+		l = Loan(loanAddr);
+		address owner = l.owner();
+		if (owner == msg.sender) {
+			if (loans.length <=0 || n > loans.length) {
+				return;
 			}
-		}
-		else {
-			setCreditScore(n);
-			loans[n] = loans[loans.length -1];
-			delete loans[loans.length -1];
-			loans.length--;
+			else if (loans.length == 1) {
+				if (n == 0) {
+					setCreditScore(n);
+					delete loans[n];
+					loans.length--;
+				}
+			}
+			else {
+				setCreditScore(n);
+				loans[n] = loans[loans.length -1];
+				delete loans[loans.length -1];
+				loans.length--;
+			}	
 		}
 	}
 

@@ -15,7 +15,7 @@
     		address: dbAddr
     	});
 
-    	var curAcct = "";
+    	var curAcct = web3.eth.defaultAccount;
     	//marked for deletion
     	//var cb = web3.eth.coinbase;
     	//alert(cb);
@@ -401,7 +401,7 @@
           <div class="result"></div>
         </div>
 
-        <h4 id="rm-loan">Remove loan/Withdraw repayment</h4>
+        <h4 id="rm-loan">Remove loan / Withdraw repayment</h4>
         <div class="form-group rm-loan">
           <p>
             Enter the <code>index</code> of the loan you want to remove. You must be the owner of the loan. Any funds will
