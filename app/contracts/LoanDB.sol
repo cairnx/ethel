@@ -8,32 +8,6 @@ contract LoanDB {
 	mapping(address => int) public creditScore;
 	Loan l;
 
-	//23.03
-	//a new branch
-
-	//24.03
-	//have opted not to manage Loans thru LoanDB
-	//reason - out of gas exceptions
-	Loan[] lns;
-
-	function mkLns() { //marked for deltion
-
-	}
-
-	function getLn(uint index) constant returns (address) {
-		return lns[index];
-	}
-
-	function getLnAmt(uint index) constant returns(uint) {
-		return lns[index].amt();
-	}
-
-	//uint[] nums;
-
-	event Debug (
-		string str
-		);
-
 	function LoanDB() {
 
 	}
@@ -43,13 +17,8 @@ contract LoanDB {
 		return loans.length;
 	}
 
-	function addLoan(address loan){
-		//nums.push(n);
+	function pushLoan(address loan){
 		loans.push(loan);
-	}
-
-	function setLoan(uint index) {
-
 	}
 
 	function getLoan(uint n) constant returns (address loan) {
@@ -103,7 +72,7 @@ contract LoanDB {
 		if (repaid == true && repaidTime < deadline) {
 		  creditScore[borrower] = creditScore[borrower] + 1;
 		}
-		else if (now > deadline && repaid  == false && taken == true) {
+		else if (now > deadline && repaid == false && taken == true) {
 			creditScore[borrower] = creditScore[borrower] - 1;
 		}
 	}
@@ -112,51 +81,4 @@ contract LoanDB {
 		int score = creditScore[user];
 		return creditScore[user];
 	}
-/*		address loanAddr = loans[n];
-		l = Loan(loanAddr);
-		address borrower = l.borrower();
-		//l = Loan(loans[n]);
-		//address addr = l.borrower();
-		creditScore[borrower] = 100;
-	}
-
-	function getCreditScore(address borrower) constant returns (int) {
-		return creditScore[borrower];
-	}
-
-/*	function getLen() constant returns (uint) {
-		return loans.length;
-	}
-
-	function addLoan(address loan) {
-		loans.push(loan);
-	}
-
-	function getLoan(uint index) constant returns (address) {
-		return loans[index];
-	}
-
-	function rmLn(uint index) constant returns (address) {
-		address addr = loans[index];
-		delete loans[index];
-		return addr;
-	}
-
-	function removeLoan(uint index) constant returns (address) {
-		address addr;
-		if (loans.length == 0) {
-			Debug('0 loans found');
-		}
-		else if (loans.length == 1) {
-			addr = loans[0];
-			delete loans[0];
-		}
-		else {
-			address lastElem = loans[loans.length -1];
-			addr = loans[index];
-			loans[index] = lastElem;
-			delete loans[loans.length -1];
-		}
-		return addr;
-	}*/
 }

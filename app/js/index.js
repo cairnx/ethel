@@ -657,7 +657,7 @@ $(document).ready(function() {
 				else $('#intro .loandb .add .result').append('Error: loan amt and rpy not initialised');
 			});
 */
-			ldb.addLoan(deployedLoan.address, {from: curAcct}).then(function() {
+			ldb.pushLoan(deployedLoan.address, {from: curAcct}).then(function() {
 				$('#intro .loandb .add .result').append('<br />Added to LoanDB');
 
 				web3.eth.sendTransaction({from: curAcct, to: deployedLoan.address, value: amtWei});
@@ -681,7 +681,7 @@ $(document).ready(function() {
 			$('#intro .loandb .rq .result').html('Loan request deployed: ' + deployedLoan.address + '(' + amt +
 				', ' + rpy + ')');
 
-			ldb.addLoan(deployedLoan.address, {from: curAcct}).then(function() {
+			ldb.pushLoan(deployedLoan.address, {from: curAcct}).then(function() {
 				$('#intro .loandb .rq .result').append('<br />Added to LoanDB');
 			});
 		});
@@ -1166,7 +1166,7 @@ $(document).ready(function() {
 											displayToUser = true;
 										}
 										if (displayToUser) {
-											var interest = (parseInt(values[3]) - parseInt(values[2])) / parseInt(values[2]) * 100;
+											var interest = ((parseFloat(values[3]) - parseFloat(values[2])) / parseFloat(values[2]) * 100).toFixed(2);
 											$('#user .cp .result').append(i + ': ' +  typeString + ' // ' +
 												values[2]  + ' ETH // Repay ' + values[3] + ' ETH // ' + values[4] +
 												' days // Interest: ' + interest + '% // Deadline: ' + values[7] + values[8] + 
@@ -1211,7 +1211,7 @@ $(document).ready(function() {
 										if (values[0] && values[5] == curAcct) {		//if loan is taken and user is owner
 											//and belongs to logged in user
 											//output loan params
-											var interest = (parseInt(values[3]) - parseInt(values[2])) / parseInt(values[2]) * 100;
+											var interest = (parseInt(values[3]) - parseInt(values[2])) / parseInt(values[3]) * 100;
 											$('#user .cp .result').append(i + ': ' +  //index
 												' <b>LENT</b> // Lent ' + values[2]  + ' ETH // Repayment ' + values[3] + ' ETH // ' + values[4] +
 												' days // Interest: ' + interest + '% // Deadline: ' + values[6] + values[8] + 
@@ -1257,7 +1257,7 @@ $(document).ready(function() {
 									if (values[0] && values[5] == curAcct) {		//if loan is taken and user is borrower
 										//and belongs to logged in user
 										//output loan params
-										var interest = (parseInt(values[3]) - parseInt(values[2])) / parseInt(values[2]) * 100;
+										var interest = (parseInt(values[3]) - parseInt(values[2])) / parseInt(values[3]) * 100;
 										$('#user .cp .result').append(i + ': ' +  //index
 											' <b>TAKEN</b> // Borrowed ' + values[2]  +
 											' ETH // Repay ' + values[3] + ' ETH // '+
@@ -1301,7 +1301,7 @@ $(document).ready(function() {
 										if (!values[0] && !values[1] && values[6] == curAcct) {		//if loan is avail and is offer
 											//and belongs to logged in user
 											//output loan params
-											var interest = (parseInt(values[3]) - parseInt(values[2])) / parseInt(values[2]) * 100;
+											var interest = (parseInt(values[3]) - parseInt(values[2])) / parseInt(values[3]) * 100;
 											$('#user .cp .result').append(i + ':' +  //index
 												' <b>OFFER</b> // Offering ' + values[2]  + ' ETH // Repay ' + values[3] + ' ETH // ' + values[4] +
 												' days // Interest: ' + interest + '% // Minimum score ' + values[5] + '<br />');
@@ -1339,7 +1339,7 @@ $(document).ready(function() {
 								]).then(function(values){
 										if (values[1] && values[5] == curAcct) {		//if loan is request and owned by logged in user
 											//output loan params
-											var interest = (parseInt(values[3]) - parseInt(values[2])) / parseInt(values[2]) * 100;
+											var interest = (parseInt(values[3]) - parseInt(values[2])) / parseInt(values[3]) * 100;
 											$('#user .cp .result').append(i + ': ' +  //index
 												' <b>REQUEST</b> Requesting ' + values[2]  + ' ETH // Repay ' + values[3] +
 												' ETH // ' + values[4] + ' days // Interest: ' + interest + '% <br />');
@@ -1499,7 +1499,7 @@ $(document).ready(function() {
 								]).then(function(values){
 										if (values[1] && !values[0]) {		//if loan is REQUEST & taken is false i.e. avail = true
 											//output loan params
-											var interest = (parseInt(values[3]) - parseInt(values[2])) / parseInt(values[2]) * 100;
+											var interest = ((parseFloat(values[3]) - parseFloat(values[2])) / parseFloat(values[3]) * 100).toFixed(2);
 											$('#user .lend .view-rq-result').append(i + ': <b>REQEUST</b>' +  //index
 												' Borrow ' + values[2]  + ' ETH // Repay ' + values[3] + ' ETH // ' + values[4] +
 												' days // Interest: ' + interest +'% // Requester credit score: ' + values[5] + '<br />');
@@ -1569,12 +1569,11 @@ $(document).ready(function() {
 
 			//deploy params: amount, repayment, duration, minScore, isRequest, dbAddr
 			Loan.deploy([amtWei, rpyWei, dur, minScore, false, dbAddr], {from:curAcct, value: amtWei, gas:4700000}).then(function(deployedLoan) {
-				ldb.addLoan(deployedLoan.address, {from:curAcct, gas:4700000}).then(function() {
+				ldb.pushLoan(deployedLoan.address, {from:curAcct, gas:4700000}).then(function() {
 					//web3.eth.sendTransaction({from:curAcct, to: deployedLoan.address, value: amtWei});
 					//var bal = getEtherBalance(deployedLoan.address);
-					rpy = parseInt(rpy);
-					amt = parseInt(amt);
-					var interest = (( rpy - amt ) / amt * 100);
+					var interest = (( parseFloat(rpyWei) - parseFloat(amtWei )) / parseFloat(amtWei) * 100).toFixed(2);
+					alert(interest);
 					$('#user .lend .make-of-result').html(
 						"<font color='green'><b>Successfully created loan offer</b></font>" +
 						'<br />Offering ' + amt + ' ETH for ' + dur + ' days at ' + interest +
@@ -1622,8 +1621,8 @@ $(document).ready(function() {
 								]).then(function(values){
 										if (!values[0] && !values[1]) {		//if loan is avail and is offer
 											//output loan params
-											var interest = (parseInt(values[3]) - parseInt(values[2])) / parseInt(values[2]) * 100;
-											$('#user .borrow .view-of-result').append(i + ': <b>REQUEST</b>' +  //index
+											var interest = ((parseFloat(values[3]) - parseFloat(values[2])) / parseFloat(values[2]) * 100).toFixed(2);
+											$('#user .borrow .view-of-result').append(i + ': <b>OFFER</b>' +  //index
 												' Borrow ' + values[2]  + ' ETH // Repay ' + values[3] + ' ETH // ' + values[4] +
 												' days // Interest: ' + interest + '% // Minimum credit score: ' + values[5] + '<br />');
 										}
@@ -1707,7 +1706,7 @@ $(document).ready(function() {
 			//deploy params: amount, repayment, duration, minScore, isRequest, dbAddr
 			Loan.deploy([amtWei, rpyWei, dur, 0, true, dbAddr], {from:curAcct})
 			.then(function(deployedLoan) {
-				ldb.addLoan(deployedLoan.address).then(function() {
+				ldb.pushLoan(deployedLoan.address).then(function() {
 					//var bal = getEtherBalance(deployedLoan.address);
 					$('#user .borrow .make-rq-result').html(
 						'Loan request created successfully' +
