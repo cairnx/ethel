@@ -5,10 +5,7 @@
     <link rel="stylesheet" href="css/app.css">
     <script src="js/app.js"></script>
     <script type="text/javascript">
-    //26.03 testing as LoanDB not defined error was showing in consoel
-    //turns out the ethereum simulator node was not detected by embark
-/*    	var lnAddr = Loan.address.toString();
-    	alert(lnAddr);*/
+
     	var dbAddr = LoanDB.address.toString();
     	var ldb = new EmbarkJS.Contract({
     		abi: LoanDB.abi,
@@ -16,10 +13,6 @@
     	});
 
     	var curAcct = web3.eth.defaultAccount;
-    	//marked for deletion
-    	//var cb = web3.eth.coinbase;
-    	//alert(cb);
-    	//alert(web3.eth.coinbase);
 
     </script>    
   </head>
@@ -372,6 +365,7 @@
           purposes.</p>
           <input class="addr" placeholder="enter address" />
           <button class="login">Log in</button>
+          <button class="logout">Log out</button>
           <button class="clear">Clear</button>
           <div class="result"></div>
         </div>

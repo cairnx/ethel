@@ -79458,13 +79458,20 @@ $(document).ready(function() {
 		if (curAcct == "") {
 			curAcct = web3.eth.defaultAccount;
 		}
-		$('#user .login .result').html('<b>Your account info</b> <br />' +
-			'Currently logged in as: <code>' + curAcct + '</code>' +
-			'<br />Account balance: ' + getEtherBalance(curAcct) + ' ETH' +
-			'<br />Credit score: ');
-		LoanDB.getCreditScore(curAcct, {from:curAcct}).then(function(score) { 
-		  $('#user .login .result').append(score.toNumber())
-	  });
+	
+		if (curAcct == "0") {
+			$('#user .login .result').html('<b>Logged out</b>' +
+				'<br />Enter Ethereum address to login');
+		}
+		else {
+			$('#user .login .result').html('<b>Your account info</b> <br />' +
+				'Currently logged in as: <code>' + curAcct + '</code>' +
+				'<br />Account balance: ' + getEtherBalance(curAcct) + ' ETH' +
+				'<br />Credit score: ');
+			LoanDB.getCreditScore(curAcct, {from:curAcct}).then(function(score) { 
+			  $('#user .login .result').append(score.toNumber());
+		  });			
+		}
 	}	
 
 	function validateIndex(index) {
@@ -79499,6 +79506,14 @@ $(document).ready(function() {
 		}
 		if (invalidInput > 0) {
 			alert('amount, repayable and duration must be > 0');
+			return false;
+		}
+		else return true;
+	}
+
+	function loggedIn() {
+		if (curAcct == 0) {
+			alert('Error: please log in');
 			return false;
 		}
 		else return true;
@@ -79562,6 +79577,30 @@ $(document).ready(function() {
 	$('#user .login button.login').click(function() {
 	  curAcct = $('#user .login .addr').val();
 		displayLoginInfo();
+	  $('#user .cp .result').html("");
+		$('#user .repay-loan .result').html("");
+		$('#user .rm-loan .result').html("");
+		$('#user .lend .view-rq-result').html("");
+		$('#user .lend .fill-rq-result').html("");
+		$('#user .lend .make-of-result').html("");
+		$('#user .borrow .view-of-result').html("");
+		$('#user .borrow .take-of-result').html("");
+		$('#user .borrow .make-rq-result').html("");
+	});
+
+	//Log out
+	$('#user .login button.logout').click(function() {
+		curAcct = 0;
+		$('#user .login .result').html('<b>Logged out</b><br />Enter Ethereum account to log in');
+	  $('#user .cp .result').html("");
+		$('#user .repay-loan .result').html("");
+		$('#user .rm-loan .result').html("");
+		$('#user .lend .view-rq-result').html("");
+		$('#user .lend .fill-rq-result').html("");
+		$('#user .lend .make-of-result').html("");
+		$('#user .borrow .view-of-result').html("");
+		$('#user .borrow .take-of-result').html("");
+		$('#user .borrow .make-rq-result').html("");
 	});
 
 	//12.04 - Clear login
@@ -79575,366 +79614,380 @@ $(document).ready(function() {
 
 	//13.04 - View all loans and offers for this user
 	$('#user .cp button.all').click(function() {
-		LoanDB.getLen({from:curAcct}).then(function(len) {
-			if (len == 0 ) {  //if no loans in LoanDB
-				$('#user .cp .result').html('No loans in database');
-			}
-			else {
-				$('#user .cp .result').html('<b>All loans lent, loans taken, requests and offers:</b> <br />');  //reset output
-				for (var i = 0; i < len; i++) {		//iterate over array in JS not in solidity to contract out of gas
-					(function (i) {									//js closure
-						LoanDB.getLoan(i, {from:curAcct}).then(function(addr) {		//get loan at loop index i
-							curLoan = new EmbarkJS.Contract({
-								abi: Loan.abi,
-								address: addr
-							});
-							Promise.all([	//get all the loan data
-								takenPromise(curLoan),  //0 taken/avail
-								requestPromise(curLoan),  //1 request/offer
-								amtPromise(curLoan),  //2 amount ether
-								rpyPromise(curLoan),  //3 repayment ether
-								durPromise(curLoan),  //4 duration days
-								ownerPromise(curLoan),  //5 owner
-								borrowerPromise(curLoan),	//6 borrower
-								deadlinePromise(curLoan),	//7 deadline
-								repaidPromise(curLoan)		//8 repaid true/false
-								]).then(function(values){
-									var displayToUser = false;
-									var typeString = '';
-										if (values[0] && values[5] == curAcct) {	//taken = true, owner = lender = cur
-											typeString = '<b>LENT</b> ';
-											values[6] = '<br />Borrower: <code>' + values[6] + '</code>';
-											values[5] = '<br>Owner: <code>' + values[5] + '</code>';
-											displayToUser = true;
-											if (values[8]) { values[8] = " // <font color='green'><b>REPAYMENT COMPLETE</b></font>"; }
-											else if (!values[8]) { values[8] = " // <font color='crimson'><b>AWATING REPAYMENT</b></font>"; }
-										}
-										else if (values[0] && values[6] == curAcct) {
-											typeString = '<b>Borrowed</b> ';
-											values[6] = '<br />Borrower: <code>' + values[6] + '</code>';
-											values[5] = '<br />Owner: <code>' + values[5] + '</code>';
-											displayToUser = true;
-											if (values[8]) { values[8] = " // <font color='green'><b>REPAID</b></font>"; }
-											else if (!values[8]) { values[8] = " // <font color='crimson'><b>UNPAID</b></font>"; }
-										}
-										else if (!values[0] && !values[1] && values[5] == curAcct) {
-											typeString = '<b>OFFERING</b> ';
-											values[7] = 'N/A';				//7 deadline n/a
-											values[6] = 'N/A';				//borrower N/A for offer
-											displayToUser = true;
-											values[8] = '';						//8 repaid n/a
-											values[5] = ''; values[6] = '';
-										}
-										else if (!values[0] && values[1] && values[5] == curAcct) { //if avail & request & owner
-											typeString = '<b>REQUESTING</b> ';
-											values[7] = 'N/A';				//7 deadline n/a
-											values[6] = 'N/A';				//borrower N/A for viewing own requests
-											displayToUser = true;
-											values[8] = '';						//8 repaid n/a
-											values[5] = ''; values[6] = '';
-										}
-										else if (values[5] == curAcct || values[6] == curAcct) {
-											typeString = '<b>ERROR UNKNOWN TYPE</b>';
-											displayToUser = true;
-										}
-										if (displayToUser) {
-											var interest = ((parseFloat(values[3]) - parseFloat(values[2])) / parseFloat(values[2]) * 100).toFixed(2);
-											$('#user .cp .result').append(i + ': ' +  typeString + ' // ' +
-												values[2]  + ' ETH // Repay ' + values[3] + ' ETH // ' + values[4] +
-												' days // Interest: ' + interest + '% // Deadline: ' + values[7] + values[8] + 
-												values[5] + values[6] + '<br />');
-										}
-								});
-						});
-					})(i);
+		if (loggedIn()) {
+			LoanDB.getLen({from:curAcct}).then(function(len) {
+				if (len == 0 ) {  //if no loans in LoanDB
+					$('#user .cp .result').html('No loans in database');
 				}
-			}
-		});	
+				else {
+					$('#user .cp .result').html('<b>All loans lent, loans taken, requests and offers:</b> <br />');  //reset output
+					for (var i = 0; i < len; i++) {		//iterate over array in JS not in solidity to contract out of gas
+						(function (i) {									//js closure
+							LoanDB.getLoan(i, {from:curAcct}).then(function(addr) {		//get loan at loop index i
+								curLoan = new EmbarkJS.Contract({
+									abi: Loan.abi,
+									address: addr
+								});
+								Promise.all([	//get all the loan data
+									takenPromise(curLoan),  //0 taken/avail
+									requestPromise(curLoan),  //1 request/offer
+									amtPromise(curLoan),  //2 amount ether
+									rpyPromise(curLoan),  //3 repayment ether
+									durPromise(curLoan),  //4 duration days
+									ownerPromise(curLoan),  //5 owner
+									borrowerPromise(curLoan),	//6 borrower
+									deadlinePromise(curLoan),	//7 deadline
+									repaidPromise(curLoan)		//8 repaid true/false
+									]).then(function(values){
+										var displayToUser = false;
+										var typeString = '';
+											if (values[0] && values[5] == curAcct) {	//taken = true, owner = lender = cur
+												typeString = '<b>LENT</b> ';
+												values[6] = '<br />Borrower: <code>' + values[6] + '</code>';
+												values[5] = '<br>Owner: <code>' + values[5] + '</code>';
+												displayToUser = true;
+												if (values[8]) { values[8] = " // <font color='green'><b>REPAYMENT COMPLETE</b></font>"; }
+												else if (!values[8]) { values[8] = " // <font color='crimson'><b>AWATING REPAYMENT</b></font>"; }
+											}
+											else if (values[0] && values[6] == curAcct) {
+												typeString = '<b>Borrowed</b> ';
+												values[6] = '<br />Borrower: <code>' + values[6] + '</code>';
+												values[5] = '<br />Owner: <code>' + values[5] + '</code>';
+												displayToUser = true;
+												if (values[8]) { values[8] = " // <font color='green'><b>REPAID</b></font>"; }
+												else if (!values[8]) { values[8] = " // <font color='crimson'><b>UNPAID</b></font>"; }
+											}
+											else if (!values[0] && !values[1] && values[5] == curAcct) {
+												typeString = '<b>OFFERING</b> ';
+												values[7] = 'N/A';				//7 deadline n/a
+												values[6] = 'N/A';				//borrower N/A for offer
+												displayToUser = true;
+												values[8] = '';						//8 repaid n/a
+												values[5] = ''; values[6] = '';
+											}
+											else if (!values[0] && values[1] && values[5] == curAcct) { //if avail & request & owner
+												typeString = '<b>REQUESTING</b> ';
+												values[7] = 'N/A';				//7 deadline n/a
+												values[6] = 'N/A';				//borrower N/A for viewing own requests
+												displayToUser = true;
+												values[8] = '';						//8 repaid n/a
+												values[5] = ''; values[6] = '';
+											}
+											else if (values[5] == curAcct || values[6] == curAcct) {
+												typeString = '<b>ERROR UNKNOWN TYPE</b>';
+												displayToUser = true;
+											}
+											if (displayToUser) {
+												var interest = ((parseFloat(values[3]) - parseFloat(values[2])) / parseFloat(values[2]) * 100).toFixed(2);
+												$('#user .cp .result').append(i + ': ' +  typeString + ' // ' +
+													values[2]  + ' ETH // Repay ' + values[3] + ' ETH // ' + values[4] +
+													' days // Interest: ' + interest + '% // Deadline: ' + values[7] + values[8] + 
+													values[5] + values[6] + '<br />');
+											}
+									});
+							});
+						})(i);
+					}
+				}
+			});	
+		}
 	});
 
 	//User cp - View all loans lent by this user
 	$('#user .cp button.lent').click(function() {
-		LoanDB.getLen({from:curAcct}).then(function(len) {
-			if (len == 0 ) {  //if no loans in LoanDB
-				$('#user .cp .result').html('No loans in database');
-			}
-			else {
-				$('#user .cp .result').html('<b>Loans you\'ve lent:</b> <br />');  //reset output
-				for (var i = 0; i < len; i++) {		//iterate over array in JS not in solidity to contract out of gas
-					(function (i) {									//js closure
-						LoanDB.getLoan(i, {from:curAcct}).then(function(addr) {		//get loan at loop index i
-							curLoan = new EmbarkJS.Contract({
-								abi: Loan.abi,
-								address: addr
-							});
-							Promise.all([	//get all the loan data
-								takenPromise(curLoan),  //0 taken/avail
-								requestPromise(curLoan),  //1 request/offer
-								amtPromise(curLoan),  //2 amount ether
-								rpyPromise(curLoan),  //3 repayment ether
-								durPromise(curLoan),  //4 duration days
-								ownerPromise(curLoan),  //5 owner
-								deadlinePromise(curLoan),	//6 deadline
-								borrowerPromise(curLoan),	//7 borrower
-								repaidPromise(curLoan)		//8 repaid true/false
-								]).then(function(values){
-										if (values[8]) { values[8] = " // <font color = 'green'><b>REPAYMENT COMPLETE</b></font>"; }
-											else { values[8] = " // <font color='crimson'><b>AWAITING REPAYMENT</b></font>"; }
-										if (values[0] && values[5] == curAcct) {		//if loan is taken and user is owner
-											//and belongs to logged in user
-											//output loan params
-											var interest = ((parseFloat(values[3]) - parseFloat(values[2])) / parseFloat(values[2]) * 100).toFixed(2);
-											$('#user .cp .result').append(i + ': ' +  //index
-												' <b>LENT</b> // Lent ' + values[2]  + ' ETH // Repayment ' + values[3] + ' ETH // ' + values[4] +
-												' days // Interest: ' + interest + '% // Deadline: ' + values[6] + values[8] + 
-												//'<br />Owner: <code>' + values[5] + '</code>' +
-												'<br />Borrower: <code>' + values[7] + '</code><br />');
-										}
-									});
-						});
-					})(i);
+		if(loggedIn()){
+			LoanDB.getLen({from:curAcct}).then(function(len) {
+				if (len == 0 ) {  //if no loans in LoanDB
+					$('#user .cp .result').html('No loans in database');
 				}
-			}
-		});	
+				else {
+					$('#user .cp .result').html('<b>Loans you\'ve lent:</b> <br />');  //reset output
+					for (var i = 0; i < len; i++) {		//iterate over array in JS not in solidity to contract out of gas
+						(function (i) {									//js closure
+							LoanDB.getLoan(i, {from:curAcct}).then(function(addr) {		//get loan at loop index i
+								curLoan = new EmbarkJS.Contract({
+									abi: Loan.abi,
+									address: addr
+								});
+								Promise.all([	//get all the loan data
+									takenPromise(curLoan),  //0 taken/avail
+									requestPromise(curLoan),  //1 request/offer
+									amtPromise(curLoan),  //2 amount ether
+									rpyPromise(curLoan),  //3 repayment ether
+									durPromise(curLoan),  //4 duration days
+									ownerPromise(curLoan),  //5 owner
+									deadlinePromise(curLoan),	//6 deadline
+									borrowerPromise(curLoan),	//7 borrower
+									repaidPromise(curLoan)		//8 repaid true/false
+									]).then(function(values){
+											if (values[8]) { values[8] = " // <font color = 'green'><b>REPAYMENT COMPLETE</b></font>"; }
+												else { values[8] = " // <font color='crimson'><b>AWAITING REPAYMENT</b></font>"; }
+											if (values[0] && values[5] == curAcct) {		//if loan is taken and user is owner
+												//and belongs to logged in user
+												//output loan params
+												var interest = ((parseFloat(values[3]) - parseFloat(values[2])) / parseFloat(values[2]) * 100).toFixed(2);
+												$('#user .cp .result').append(i + ': ' +  //index
+													' <b>LENT</b> // Lent ' + values[2]  + ' ETH // Repayment ' + values[3] + ' ETH // ' + values[4] +
+													' days // Interest: ' + interest + '% // Deadline: ' + values[6] + values[8] + 
+													//'<br />Owner: <code>' + values[5] + '</code>' +
+													'<br />Borrower: <code>' + values[7] + '</code><br />');
+											}
+										});
+							});
+						})(i);
+					}
+				}
+			});	
+		}
 	});
 
 	//13.04 - View all loans taken by this user
 	$('#user .cp button.taken').click(function() {
-		LoanDB.getLen({from:curAcct}).then(function(len) {
-			if (len == 0 ) {  //if no loans in LoanDB
-				$('#user .cp .result').html('No loans in database');
-			}
-			else {
-				$('#user .cp .result').html('<b>Loans you\'ve taken:</b> <br />');  //reset output
-				for (var i = 0; i < len; i++) {		//iterate over array in JS not in solidity to contract out of gas
-					(function (i) {									//js closure
-						LoanDB.getLoan(i, {from:curAcct}).then(function(addr) {		//get loan at loop index i
-							curLoan = new EmbarkJS.Contract({
-								abi: Loan.abi,
-								address: addr
-							});
-							Promise.all([	//get all the loan data
-								takenPromise(curLoan),  //0 taken/avail
-								requestPromise(curLoan),  //1 request/offer
-								amtPromise(curLoan),  //2 amount ether
-								rpyPromise(curLoan),  //3 repayment ether
-								durPromise(curLoan),  //4 duration days
-								borrowerPromise(curLoan),  //5 borrower
-								deadlinePromise(curLoan),	//6 deadline
-								ownerPromise(curLoan),		//7 owner
-								repaidPromise(curLoan)		//8 repaid true/false
-								]).then(function(values){
-									if (values[8]) { values[8] = "<font color='green'><b>REPAID</b></font>"; }
-										else { values[8] = "<font color='crimson'><b>UNPAID</b></font>"; }
-									if (values[0] && values[5] == curAcct) {		//if loan is taken and user is borrower
-										//and belongs to logged in user
-										//output loan params
-										var interest = ((parseFloat(values[3]) - parseFloat(values[2])) / parseFloat(values[2]) * 100).toFixed(2);
-										$('#user .cp .result').append(i + ': ' +  //index
-											' <b>TAKEN</b> // Borrowed ' + values[2]  +
-											' ETH // Repay ' + values[3] + ' ETH // '+
-											values[4] + ' days // ' +
-											'Interest: ' + interest + '% // ' +
-											'Deadline: ' + values[6] + ' // ' +
-											values[8] + '<br />Lender: <code>' + values[7] + '</code><br />' );
-									}
-								});
-						});
-					})(i);
+		if (loggedIn()) {
+			LoanDB.getLen({from:curAcct}).then(function(len) {
+				if (len == 0 ) {  //if no loans in LoanDB
+					$('#user .cp .result').html('No loans in database');
 				}
-			}
-		});	
+				else {
+					$('#user .cp .result').html('<b>Loans you\'ve taken:</b> <br />');  //reset output
+					for (var i = 0; i < len; i++) {		//iterate over array in JS not in solidity to contract out of gas
+						(function (i) {									//js closure
+							LoanDB.getLoan(i, {from:curAcct}).then(function(addr) {		//get loan at loop index i
+								curLoan = new EmbarkJS.Contract({
+									abi: Loan.abi,
+									address: addr
+								});
+								Promise.all([	//get all the loan data
+									takenPromise(curLoan),  //0 taken/avail
+									requestPromise(curLoan),  //1 request/offer
+									amtPromise(curLoan),  //2 amount ether
+									rpyPromise(curLoan),  //3 repayment ether
+									durPromise(curLoan),  //4 duration days
+									borrowerPromise(curLoan),  //5 borrower
+									deadlinePromise(curLoan),	//6 deadline
+									ownerPromise(curLoan),		//7 owner
+									repaidPromise(curLoan)		//8 repaid true/false
+									]).then(function(values){
+										if (values[8]) { values[8] = "<font color='green'><b>REPAID</b></font>"; }
+											else { values[8] = "<font color='crimson'><b>UNPAID</b></font>"; }
+										if (values[0] && values[5] == curAcct) {		//if loan is taken and user is borrower
+											//and belongs to logged in user
+											//output loan params
+											var interest = ((parseFloat(values[3]) - parseFloat(values[2])) / parseFloat(values[2]) * 100).toFixed(2);
+											$('#user .cp .result').append(i + ': ' +  //index
+												' <b>TAKEN</b> // Borrowed ' + values[2]  +
+												' ETH // Repay ' + values[3] + ' ETH // '+
+												values[4] + ' days // ' +
+												'Interest: ' + interest + '% // ' +
+												'Deadline: ' + values[6] + ' // ' +
+												values[8] + '<br />Lender: <code>' + values[7] + '</code><br />' );
+										}
+									});
+							});
+						})(i);
+					}
+				}
+			});	
+		}
 	});
 
 	//13.04 - View all loan offers from this user
 	$('#user .cp button.offers').click(function() {
-		LoanDB.getLen({from:curAcct}).then(function(len) {
-			if (len == 0 ) {  //if no loans in LoanDB
-				$('#user .cp .result').html('No loans in database');
-			}
-			else {
-				$('#user .cp .result').html('<b>Your loan offers:</b> <br />');  //reset output
-				for (var i = 0; i < len; i++) {		//iterate over array in JS not in solidity to contract out of gas
-					(function (i) {									//js closure
-						LoanDB.getLoan(i, {from:curAcct}).then(function(addr) {		//get loan at loop index i
-							curLoan = new EmbarkJS.Contract({
-								abi: Loan.abi,
-								address: addr
-							});
-							Promise.all([	//get all the loan data
-								takenPromise(curLoan),  //0 taken/avail
-								requestPromise(curLoan),  //1 request/offer
-								amtPromise(curLoan),  //2 amount ether
-								rpyPromise(curLoan),  //3 repayment ether
-								durPromise(curLoan),  //4 duration days
-								minScorePromise(curLoan),  //5 minimum score
-								ownerPromise(curLoan)  //6 owner
-								]).then(function(values){
-										if (!values[0] && !values[1] && values[6] == curAcct) {		//if loan is avail and is offer
-											//and belongs to logged in user
-											//output loan params
-											var interest = ((parseFloat(values[3]) - parseFloat(values[2])) / parseFloat(values[2]) * 100).toFixed(2);
-											$('#user .cp .result').append(i + ':' +  //index
-												' <b>OFFER</b> // Offering ' + values[2]  + ' ETH // Repay ' + values[3] + ' ETH // ' + values[4] +
-												' days // Interest: ' + interest + '% // Minimum score ' + values[5] + '<br />');
-										}
-									});
-						});
-					})(i);
+		if (loggedIn()){
+				LoanDB.getLen({from:curAcct}).then(function(len) {
+				if (len == 0 ) {  //if no loans in LoanDB
+					$('#user .cp .result').html('No loans in database');
 				}
-			}
-		});
+				else {
+					$('#user .cp .result').html('<b>Your loan offers:</b> <br />');  //reset output
+					for (var i = 0; i < len; i++) {		//iterate over array in JS not in solidity to contract out of gas
+						(function (i) {									//js closure
+							LoanDB.getLoan(i, {from:curAcct}).then(function(addr) {		//get loan at loop index i
+								curLoan = new EmbarkJS.Contract({
+									abi: Loan.abi,
+									address: addr
+								});
+								Promise.all([	//get all the loan data
+									takenPromise(curLoan),  //0 taken/avail
+									requestPromise(curLoan),  //1 request/offer
+									amtPromise(curLoan),  //2 amount ether
+									rpyPromise(curLoan),  //3 repayment ether
+									durPromise(curLoan),  //4 duration days
+									minScorePromise(curLoan),  //5 minimum score
+									ownerPromise(curLoan)  //6 owner
+									]).then(function(values){
+											if (!values[0] && !values[1] && values[6] == curAcct) {		//if loan is avail and is offer
+												//and belongs to logged in user
+												//output loan params
+												var interest = ((parseFloat(values[3]) - parseFloat(values[2])) / parseFloat(values[2]) * 100).toFixed(2);
+												$('#user .cp .result').append(i + ':' +  //index
+													' <b>OFFER</b> // Offering ' + values[2]  + ' ETH // Repay ' + values[3] + ' ETH // ' + values[4] +
+													' days // Interest: ' + interest + '% // Minimum score ' + values[5] + '<br />');
+											}
+										});
+							});
+						})(i);
+					}
+				}
+			});
+		}
 	});
 
 	//13.04 - View all loan requests from this user
 	$('#user .cp button.requests').click(function() {
-		LoanDB.getLen({from:curAcct}).then(function(len) {
-			if (len == 0 ) {  //if no loans in LoanDB
-				$('#user .cp .result').html('No loans in database');
-			}
-			else {
-				$('#user .cp .result').html('<b>Your loan requests:</b> <br />');  //reset output
-				for (var i = 0; i < len; i++) {		//iterate over array in JS not in solidity to contract out of gas
-					(function (i) {									//js closure
-						LoanDB.getLoan(i, {from:curAcct}).then(function(addr) {		//get loan at loop index i
-							curLoan = new EmbarkJS.Contract({
-								abi: Loan.abi,
-								address: addr
-							});
-							Promise.all([	//get all the loan data
-								takenPromise(curLoan),  //0 taken/avail
-								requestPromise(curLoan),  //1 request/offer
-								amtPromise(curLoan),  //2 amount ether
-								rpyPromise(curLoan),  //3 repayment ether
-								durPromise(curLoan),  //4 duration days
-								ownerPromise(curLoan)  //5 owner
-								]).then(function(values){
-										if (values[1] && values[5] == curAcct) {		//if loan is request and owned by logged in user
-											//output loan params
-											var interest = ((parseFloat(values[3]) - parseFloat(values[2])) / parseFloat(values[2]) * 100).toFixed(2);
-											$('#user .cp .result').append(i + ': ' +  //index
-												' <b>REQUEST</b> Requesting ' + values[2]  + ' ETH // Repay ' + values[3] +
-												' ETH // ' + values[4] + ' days // Interest: ' + interest + '% <br />');
-										}
-									});
-						});
-					})(i);
+		if (loggedIn()) {
+			LoanDB.getLen({from:curAcct}).then(function(len) {
+				if (len == 0 ) {  //if no loans in LoanDB
+					$('#user .cp .result').html('No loans in database');
 				}
-			}
-		});
+				else {
+					$('#user .cp .result').html('<b>Your loan requests:</b> <br />');  //reset output
+					for (var i = 0; i < len; i++) {		//iterate over array in JS not in solidity to contract out of gas
+						(function (i) {									//js closure
+							LoanDB.getLoan(i, {from:curAcct}).then(function(addr) {		//get loan at loop index i
+								curLoan = new EmbarkJS.Contract({
+									abi: Loan.abi,
+									address: addr
+								});
+								Promise.all([	//get all the loan data
+									takenPromise(curLoan),  //0 taken/avail
+									requestPromise(curLoan),  //1 request/offer
+									amtPromise(curLoan),  //2 amount ether
+									rpyPromise(curLoan),  //3 repayment ether
+									durPromise(curLoan),  //4 duration days
+									ownerPromise(curLoan)  //5 owner
+									]).then(function(values){
+											if (values[1] && values[5] == curAcct) {		//if loan is request and owned by logged in user
+												//output loan params
+												var interest = ((parseFloat(values[3]) - parseFloat(values[2])) / parseFloat(values[2]) * 100).toFixed(2);
+												$('#user .cp .result').append(i + ': ' +  //index
+													' <b>REQUEST</b> Requesting ' + values[2]  + ' ETH // Repay ' + values[3] +
+													' ETH // ' + values[4] + ' days // Interest: ' + interest + '% <br />');
+											}
+										});
+							});
+						})(i);
+					}
+				}
+			});
+		}
 	});	
 
 	//14.04 User CP - Repay loan
 	$('#user .repay-loan button.repay').click(function() {
-		var index = $('#user .repay-loan input.index').val();
+		if (loggedIn()){
+			var index = $('#user .repay-loan input.index').val();
 
-		if(validateIndex(index)) {
-			LoanDB.getLoan(index, {from:curAcct}).then(function(addr) {
-				curLoan = new EmbarkJS.Contract({
-					abi: Loan.abi,
-					address: addr
-				});
-				Promise.all([												//values
-					rpyPromise(curLoan),							//0 rpy
-					borrowerPromise(curLoan),					//1 borrower
-					amtPromise(curLoan),							//2 amt
-					repaidPromise(curLoan),						//3 is repaid true/false
-					ownerPromise(curLoan)							//4 owner/lender
-					]).then(function(values) {
-						if(values[3]) {
-							$('#user .repay-loan .result').html('<b>ERROR:</b> this loan has already been repaid');
-						}
-						else if (values[0] > parseFloat(web3.fromWei(web3.eth.getBalance(curAcct), 'ether'))){
-							$('#user .repay-loan .result').html('<b>ERROR:</b> you don\'t have enough ETH' +
-								'<br />Repayment amount: ' + web3.fromWei(values[0],'ether') +
-								'<br />Your account balance: ' + getEtherBalance(curAcct)
-								);
-						}
-						else if (values[1] != curAcct) {
-							$('#user .repay-loan .result').html('<b>ERROR:</b> you aren\'t the borrower for this loan');
-						}
-						else {
-							curLoan.repay({from: curAcct, value: web3.toWei(values[0], 'ether'), gas: 4700000}).then(function() {
-								$('#user .repay-loan .result').html('<b>Successfully repaid loan</b>' +
-									'<br />Repaid ' + values[0] + ' ETH' + 
-									//'<br />Loan: <code>' + addr + '</code>' + 
-									'<br />Borrower: <code>' + values[1] + '</code>' +
-									'<br />Lender: <code>' +  values[4] + '</code>'
-									);
-							});
-						}
+			if(validateIndex(index)) {
+				LoanDB.getLoan(index, {from:curAcct}).then(function(addr) {
+					curLoan = new EmbarkJS.Contract({
+						abi: Loan.abi,
+						address: addr
 					});
-			});//.catch(indexOutOfBounds());
-		};
+					Promise.all([												//values
+						rpyPromise(curLoan),							//0 rpy
+						borrowerPromise(curLoan),					//1 borrower
+						amtPromise(curLoan),							//2 amt
+						repaidPromise(curLoan),						//3 is repaid true/false
+						ownerPromise(curLoan)							//4 owner/lender
+						]).then(function(values) {
+							if(values[3]) {
+								$('#user .repay-loan .result').html('<b>ERROR:</b> this loan has already been repaid');
+							}
+							else if (values[0] > parseFloat(web3.fromWei(web3.eth.getBalance(curAcct), 'ether'))){
+								$('#user .repay-loan .result').html('<b>ERROR:</b> you don\'t have enough ETH' +
+									'<br />Repayment amount: ' + web3.fromWei(values[0],'ether') +
+									'<br />Your account balance: ' + getEtherBalance(curAcct)
+									);
+							}
+							else if (values[1] != curAcct) {
+								$('#user .repay-loan .result').html('<b>ERROR:</b> you aren\'t the borrower for this loan');
+							}
+							else {
+								curLoan.repay({from: curAcct, value: web3.toWei(values[0], 'ether'), gas: 4700000}).then(function() {
+									$('#user .repay-loan .result').html('<b>Successfully repaid loan</b>' +
+										'<br />Repaid ' + values[0] + ' ETH' + 
+										//'<br />Loan: <code>' + addr + '</code>' + 
+										'<br />Borrower: <code>' + values[1] + '</code>' +
+										'<br />Lender: <code>' +  values[4] + '</code>'
+										);
+								});
+							}
+						});
+				});//.catch(indexOutOfBounds());
+			}		
+		}
 	});
 
 	//14.04 USER CP - Remove loan - Withdraw repayment
 	$('#user .rm-loan button').click(function() {
-	  var index = $('#user .rm-loan input.index').val();
+		if (loggedIn()) {
+		  var index = $('#user .rm-loan input.index').val();
 
-		if(validateIndex(index)) {
-			LoanDB.getLoan(index, {from:curAcct}).then(function(addr) {
-				curLoan = new EmbarkJS.Contract({
-					abi: Loan.abi,
-					address: addr
-				});
+			if(validateIndex(index)) {
+				LoanDB.getLoan(index, {from:curAcct}).then(function(addr) {
+					curLoan = new EmbarkJS.Contract({
+						abi: Loan.abi,
+						address: addr
+					});
 
-				var bal = getEtherBalance(addr);
+					var bal = getEtherBalance(addr);
 
-				Promise.all([
-					ownerPromise(curLoan),																															//0 owner
-					borrowerPromise(curLoan),																														//1 borrower
-					curLoan.deadline({from:curAcct}).then(function(deadline) { return deadline; }),			//2 deadline
-					curLoan.repaidTime({from:curAcct}).then(function(repaidTime) {return repaidTime;}),	//3 repaidTime
-					takenPromise(curLoan),																															//4 taken true/false
-					repaidPromise(curLoan),																															//5 repaid true/false
-					requestPromise(curLoan)																															//6 request / offer
-					]).then(function(values) {
-						var outStr = '';
-						var lenderStr = '';
-						var borrowerStr = '';
-						if (values[4]) { 
-							if ( parseInt(values[3]) > parseInt(values[2]) && values[5]) {
-								outStr = "<font color='crimson'>Loan was repaid after deadline - credit score penalty applied to borrower</font>";
+					Promise.all([
+						ownerPromise(curLoan),																															//0 owner
+						borrowerPromise(curLoan),																														//1 borrower
+						curLoan.deadline({from:curAcct}).then(function(deadline) { return deadline; }),			//2 deadline
+						curLoan.repaidTime({from:curAcct}).then(function(repaidTime) {return repaidTime;}),	//3 repaidTime
+						takenPromise(curLoan),																															//4 taken true/false
+						repaidPromise(curLoan),																															//5 repaid true/false
+						requestPromise(curLoan)																															//6 request / offer
+						]).then(function(values) {
+							var outStr = '';
+							var lenderStr = '';
+							var borrowerStr = '';
+							if (values[4]) { 
+								if ( parseInt(values[3]) > parseInt(values[2]) && values[5]) {
+									outStr = "<font color='crimson'>Loan was repaid after deadline - credit score penalty applied to borrower</font>";
+								}
+								else if ( parseInt(values[3]) > parseInt(values[2]) && !values[5] ) {
+									outStr = "<font color='crimson'>Loan unpaid after deadline - credit score penalty applied to borrower</font>";
+								}
+								else if ( parseInt(values[3]) < parseInt(values[2]) && values[5] ) {
+									outStr = "<font color='green'>Loan was repaid before deadline - borrower credit score increased</font>";
+								}
+								else if( parseInt(values[3]) < parseInt(values[2]) && !values[5] ) {
+									outStr = "<font color='burgundy'>Loan removed before repayment deadline - borrower credit score unaffected</font>";
+								}
+								lenderStr = '<br />Lender: <code>' + values[0] + '</code>';
+								borrowerStr = '<br />Borrower: <code>' + values[1] + '</code>';
+								outStr += "<br />Deadline: " + values[2] + "<br />Repayment timestamp: " + values[3];
 							}
-							else if ( parseInt(values[3]) > parseInt(values[2]) && !values[5] ) {
-								outStr = "<font color='crimson'>Loan unpaid after deadline - credit score penalty applied to borrower</font>";
+							else if (!values[4]) {
+							 	if(values[6]) { outStr = "<font color='blue'>Loan request was not filled</font>";	}
+							 	else if (!values[6]) { outStr = "<font color='blue'>Loan offer was not taken</font>"; }
+							 	lenderStr = '';
+							 	borrowerStr = '';
 							}
-							else if ( parseInt(values[3]) < parseInt(values[2]) && values[5] ) {
-								outStr = "<font color='green'>Loan was repaid before deadline - borrower credit score increased</font>";
+							else { outStr = "<b>Uncategorised loan type</b>" ;}
+							if(values[0] == curAcct) {
+								LoanDB.rmLoan(index, {from:curAcct, gas:4700000}).then(function() {
+									curLoan.kill({from:curAcct}).then(function() {
+										$('#user .rm-loan .result').html('<b>Successfully removed loan</b>' +
+											'<br />' + outStr + 
+											'<br />Withdrew ' + bal + ' ETH' +
+											//'<br />Loan: <code>' + addr + '</code>' +
+											lenderStr + borrowerStr
+											);
+									})
+								});
 							}
-							else if( parseInt(values[3]) < parseInt(values[2]) && !values[5] ) {
-								outStr = "<font color='burgundy'>Loan removed before repayment deadline - borrower credit score unaffected</font>";
+							else {
+								$('#user .rm-loan .result').html('<b>ERROR: Couldn\'t remove loan - check index</b>');
 							}
-							lenderStr = '<br />Lender: <code>' + values[0] + '</code>';
-							borrowerStr = '<br />Borrower: <code>' + values[1] + '</code>';
-							outStr += "<br />Deadline: " + values[2] + "<br />Repayment timestamp: " + values[3];
-						}
-						else if (!values[4]) {
-						 	if(values[6]) { outStr = "<font color='blue'>Loan request was not filled</font>";	}
-						 	else if (!values[6]) { outStr = "<font color='blue'>Loan offer was not taken</font>"; }
-						 	lenderStr = '';
-						 	borrowerStr = '';
-						}
-						else { outStr = "<b>Uncategorised loan type</b>" ;}
-						if(values[0] == curAcct) {
-							LoanDB.rmLoan(index, {from:curAcct, gas:4700000}).then(function() {
-								curLoan.kill({from:curAcct}).then(function() {
-									$('#user .rm-loan .result').html('<b>Successfully removed loan</b>' +
-										'<br />' + outStr + 
-										'<br />Withdrew ' + bal + ' ETH' +
-										//'<br />Loan: <code>' + addr + '</code>' +
-										lenderStr + borrowerStr
-										);
-								})
-							});
-						}
-						else {
-							$('#user .rm-loan .result').html('<b>ERROR: Couldn\'t remove loan - check index</b>');
-						}
-					});//.catch(console.log('Promise.all rejection'));
-					//alert(addr + ' bal: ' + bal);
-			});//.catch(indexOutOfBounds());//.catch(console.log('LoanDB.getLoan rejection'));
+						});//.catch(console.log('Promise.all rejection'));
+						//alert(addr + ' bal: ' + bal);
+				});//.catch(indexOutOfBounds());//.catch(console.log('LoanDB.getLoan rejection'));
+			}			
 		}
 	});
 
@@ -79945,118 +79998,125 @@ $(document).ready(function() {
 
 	//13.04 - Lend ETH - view requests
 	$('#user .lend button.view-rq').click(function() {
-		//first get the array length
-		LoanDB.getLen({from:curAcct}).then(function(len) {
-			if (len == 0 ) {  //if no loans in LoanDB
-				$('#user .lend .view-rq-result').html('No loans in database');
-			}
-			else {
-				$('#user .lend .view-rq-result').html('<b>Requests found:</b> <br />');  //reset output
-				for (var i = 0; i < len; i++) {		//iterate over array in JS not in solidity to contract out of gas
-					(function (i) {									//js closure
-						LoanDB.getLoan(i, {from:curAcct}).then(function(addr) {		//get loan at loop index i
-							curLoan = new EmbarkJS.Contract({
-								abi: Loan.abi,
-								address: addr
-							});
-
-							Promise.all([	//get all the loan data
-								takenPromise(curLoan),  //0 taken/avail
-								requestPromise(curLoan),		//1 request/offer
-								amtPromise(curLoan), //2 loan amount in ether
-								rpyPromise(curLoan), //3 repayment amt in ether
-								durPromise(curLoan),		//4 loan duration in days
-								//borrowerScorePromise(curAcct) //5 borrower/requester credit score
-								borrowerScorePromise(curLoan) //5 borrower/requester credit score
-								]).then(function(values){
-										if (values[1] && !values[0]) {		//if loan is REQUEST & taken is false i.e. avail = true
-											//output loan params
-											var interest = ((parseFloat(values[3]) - parseFloat(values[2])) / parseFloat(values[2]) * 100).toFixed(2);
-											$('#user .lend .view-rq-result').append(i + ': <b>REQEUST</b>' +  //index
-												' Borrow ' + values[2]  + ' ETH // Repay ' + values[3] + ' ETH // ' + values[4] +
-												' days // Interest: ' + interest +'% // Requester credit score: ' + values[5] + '<br />');
-										}
-										else { //note implemented yet on front-end
-											//marked for deletion
-											var numAvail = (len + 1) - (i + 1);;
-											$('#user .lend .total-rq').html(numAvail + ' requests found');
-										}
-									});
-						});
-					})(i);
+		if(loggedIn()){
+			//first get the array length
+			LoanDB.getLen({from:curAcct}).then(function(len) {
+				if (len == 0 ) {  //if no loans in LoanDB
+					$('#user .lend .view-rq-result').html('No loans in database');
 				}
-			}
-		});
+				else {
+					$('#user .lend .view-rq-result').html('<b>Requests found:</b> <br />');  //reset output
+					for (var i = 0; i < len; i++) {		//iterate over array in JS not in solidity to contract out of gas
+						(function (i) {									//js closure
+							LoanDB.getLoan(i, {from:curAcct}).then(function(addr) {		//get loan at loop index i
+								curLoan = new EmbarkJS.Contract({
+									abi: Loan.abi,
+									address: addr
+								});
+
+								Promise.all([	//get all the loan data
+									takenPromise(curLoan),  //0 taken/avail
+									requestPromise(curLoan),		//1 request/offer
+									amtPromise(curLoan), //2 loan amount in ether
+									rpyPromise(curLoan), //3 repayment amt in ether
+									durPromise(curLoan),		//4 loan duration in days
+									//borrowerScorePromise(curAcct) //5 borrower/requester credit score
+									borrowerScorePromise(curLoan) //5 borrower/requester credit score
+									]).then(function(values){
+											if (values[1] && !values[0]) {		//if loan is REQUEST & taken is false i.e. avail = true
+												//output loan params
+												var interest = ((parseFloat(values[3]) - parseFloat(values[2])) / parseFloat(values[2]) * 100).toFixed(2);
+												$('#user .lend .view-rq-result').append(i + ': <b>REQEUST</b>' +  //index
+													' Borrow ' + values[2]  + ' ETH // Repay ' + values[3] + ' ETH // ' + values[4] +
+													' days // Interest: ' + interest +'% // Requester credit score: ' + values[5] + '<br />');
+											}
+											else { //note implemented yet on front-end
+												//marked for deletion
+												var numAvail = (len + 1) - (i + 1);;
+												$('#user .lend .total-rq').html(numAvail + ' requests found');
+											}
+										});
+							});
+						})(i);
+					}
+				}
+			});
+		}
 	});	
 
 	//13.04 - Lend ETH - fill request - validation and error catching complete
 	$('#user .lend button.fill-rq').click(function() {
-		var index = $('#user .lend input.fill-rq-index').val();
+		if (loggedIn()) {
+			var index = $('#user .lend input.fill-rq-index').val();
 
-		if (validateIndex(index)) {
-			LoanDB.getLoan(index, {from:curAcct}).then(function(addr) {
-				curLoan = new EmbarkJS.Contract({
-					abi: Loan.abi,
-					address: addr
-				});
-				Promise.all([
-					amtPromise(curLoan), 			//0 amt
-					borrowerPromise(curLoan), //1 borrower
-					durPromise(curLoan),			//2 duration
-					rpyPromise(curLoan),				//3 rpy
-					requestPromise(curLoan)		//4 true = request, false = offer
-					]).then(function(values) {
-						if (!values[4]) {
-							alert('Error: enter the index of a request');
-						}
-						else if (values[1] == curAcct) {
-							alert('Error: You can\'t fill your own request');
-							//$('#user .lend .fill-rq-result').html('<b>ERROR: You can\'t fill your own request</b>');
-						}
-						else {
-							var bal = parseFloat(web3.toWei(values[0]));
-							var rpy = web3.fromWei(values[3], 'ether');
-							var interest = ((parseFloat(values[3]) - parseFloat(values[0])) / parseFloat(values[0]) * 100).toFixed(2);
-							curLoan.fillRequest({from:curAcct, value: bal, gas:4700000}).then(function(success) {
-								$('#user .lend .fill-rq-result').html('Filled loan request: <code>' + addr + '</code>' +
-									'<br />Loaned ' + values[0] + ' ETH ' + ' for ' + values[2] + ' days at ' + interest + '%' +
-									'<br />Repayment amount: ' + values[3] + ' ETH' +
-									'<br />Borrower: <code>' + values[1]  + '</code>');
-							}).catch(function() { console.log('curLoan.fillRequest rejection')});
-						}
-					}).catch(function() {console.log('Promise.all rejection')});
-			});//.catch(indexOutOfBounds(index));/*catch(function() {
-				/*console.log('LoanDB.getLoan rejection - index out of bounds');
-				alert('Error: index ' + index + ' out of bounds');
-			});	*/		
+			if (validateIndex(index)) {
+				LoanDB.getLoan(index, {from:curAcct}).then(function(addr) {
+					curLoan = new EmbarkJS.Contract({
+						abi: Loan.abi,
+						address: addr
+					});
+					Promise.all([
+						amtPromise(curLoan), 			//0 amt
+						borrowerPromise(curLoan), //1 borrower
+						durPromise(curLoan),			//2 duration
+						rpyPromise(curLoan),				//3 rpy
+						requestPromise(curLoan)		//4 true = request, false = offer
+						]).then(function(values) {
+							if (!values[4]) {
+								alert('Error: enter the index of a request');
+							}
+							else if (values[1] == curAcct) {
+								alert('Error: You can\'t fill your own request');
+								//$('#user .lend .fill-rq-result').html('<b>ERROR: You can\'t fill your own request</b>');
+							}
+							else {
+								var bal = parseFloat(web3.toWei(values[0]));
+								var rpy = web3.fromWei(values[3], 'ether');
+								var interest = ((parseFloat(values[3]) - parseFloat(values[0])) / parseFloat(values[0]) * 100).toFixed(2);
+								curLoan.fillRequest({from:curAcct, value: bal, gas:4700000}).then(function(success) {
+									$('#user .lend .fill-rq-result').html('Filled loan request: <code>' + addr + '</code>' +
+										'<br />Loaned ' + values[0] + ' ETH ' + ' for ' + values[2] + ' days at ' + interest + '%' +
+										'<br />Repayment amount: ' + values[3] + ' ETH' +
+										'<br />Borrower: <code>' + values[1]  + '</code>');
+								}).catch(function() { console.log('curLoan.fillRequest rejection')});
+							}
+						}).catch(function() {console.log('Promise.all rejection')});
+				});//.catch(indexOutOfBounds(index));/*catch(function() {
+					/*console.log('LoanDB.getLoan rejection - index out of bounds');
+					alert('Error: index ' + index + ' out of bounds');
+				});	*/		
+			}			
 		}
+
 	});
 
 	//13.04 - Lend ETH - make offer
 	$('#user .lend button.make-of').click(function() {
-		var amt = $('#user .lend input.amt').val();
-		var rpy = $('#user .lend input.rpy').val();
-		var minScore = $('#user .lend input.min-score').val();
-		var dur = $('#user .lend input.dur').val();
+		if (loggedIn()){
+			var amt = $('#user .lend input.amt').val();
+			var rpy = $('#user .lend input.rpy').val();
+			var minScore = $('#user .lend input.min-score').val();
+			var dur = $('#user .lend input.dur').val();
 
-		if (validateInputs([amt, rpy, dur]) && validateScore(minScore) ){
-			var amtWei = web3.toWei(amt, 'ether');
-			var rpyWei = web3.toWei(rpy, 'ether');
+			if (validateInputs([amt, rpy, dur]) && validateScore(minScore) ){
+				var amtWei = web3.toWei(amt, 'ether');
+				var rpyWei = web3.toWei(rpy, 'ether');
 
-			//deploy params: amount, repayment, duration, minScore, isRequest, dbAddr
-			Loan.deploy([amtWei, rpyWei, dur, minScore, false, dbAddr], {from:curAcct, value: amtWei, gas:4700000}).then(function(deployedLoan) {
-				LoanDB.pushLoan(deployedLoan.address, {from:curAcct, gas:4700000}).then(function() {
-					//web3.eth.sendTransaction({from:curAcct, to: deployedLoan.address, value: amtWei});
-					//var bal = getEtherBalance(deployedLoan.address);
-					var interest = (( parseFloat(rpyWei) - parseFloat(amtWei )) / parseFloat(amtWei) * 100).toFixed(2);
-					$('#user .lend .make-of-result').html(
-						"<font color='green'><b>Successfully created loan offer</b></font>" +
-						'<br />Offering ' + amt + ' ETH for ' + dur + ' days at ' + interest +
-						'% to borrowers with score ' + minScore + ' or greater' +
-						'<br />Address: <code>' + deployedLoan.address + '</code>'
-						);
+				//deploy params: amount, repayment, duration, minScore, isRequest, dbAddr
+				Loan.deploy([amtWei, rpyWei, dur, minScore, false, dbAddr], {from:curAcct, value: amtWei, gas:4700000}).then(function(deployedLoan) {
+					LoanDB.pushLoan(deployedLoan.address, {from:curAcct, gas:4700000}).then(function() {
+						//web3.eth.sendTransaction({from:curAcct, to: deployedLoan.address, value: amtWei});
+						//var bal = getEtherBalance(deployedLoan.address);
+						var interest = (( parseFloat(rpyWei) - parseFloat(amtWei )) / parseFloat(amtWei) * 100).toFixed(2);
+						$('#user .lend .make-of-result').html(
+							"<font color='green'><b>Successfully created loan offer</b></font>" +
+							'<br />Offering ' + amt + ' ETH for ' + dur + ' days at ' + interest +
+							'% to borrowers with score ' + minScore + ' or greater' +
+							'<br />Address: <code>' + deployedLoan.address + '</code>'
+							);
+					});
 				});
-			});
+			}			
 		}
 	});
 
@@ -80071,126 +80131,132 @@ $(document).ready(function() {
 
 	//13.04 - Borrow ETH - view offers
 	$('#user .borrow button.view-of').click(function() {
-		//first get the array length
-		LoanDB.getLen({from:curAcct}).then(function(len) {
-			if (len == 0 ) {  //if no loans in LoanDB
-				$('#user .borrow .view-of-result').html('No loans in database');
-			}
-			else {
-				$('#user .borrow .view-of-result').html('<b>Offers found:</b> <br />');  //reset output
-				for (var i = 0; i < len; i++) {		//iterate over array in JS not in solidity to contract out of gas
-					(function (i) {									//js closure
-						LoanDB.getLoan(i, {from:curAcct}).then(function(addr) {		//get loan at loop index i
-							curLoan = new EmbarkJS.Contract({
-								abi: Loan.abi,
-								address: addr
-							});
-
-							Promise.all([	//get all the loan data
-								takenPromise(curLoan),  //0 taken/avail
-								requestPromise(curLoan),		//1 request/offer
-								amtPromise(curLoan), //2 loan amount in ether
-								rpyPromise(curLoan), //3 repayment amt in ether
-								durPromise(curLoan),		//4 loan duration in days
-								minScorePromise(curLoan)  //5 min borrower credit score
-								]).then(function(values){
-										if (!values[0] && !values[1]) {		//if loan is avail and is offer
-											//output loan params
-											var interest = ((parseFloat(values[3]) - parseFloat(values[2])) / parseFloat(values[2]) * 100).toFixed(2);
-											$('#user .borrow .view-of-result').append(i + ': <b>OFFER</b>' +  //index
-												' Borrow ' + values[2]  + ' ETH // Repay ' + values[3] + ' ETH // ' + values[4] +
-												' days // Interest: ' + interest + '% // Minimum credit score: ' + values[5] + '<br />');
-										}
-									}).catch('Promise.all rejection');
-						});
-					})(i);
+		if (loggedIn()) {
+			//first get the array length
+			LoanDB.getLen({from:curAcct}).then(function(len) {
+				if (len == 0 ) {  //if no loans in LoanDB
+					$('#user .borrow .view-of-result').html('No loans in database');
 				}
-			}
-		});
+				else {
+					$('#user .borrow .view-of-result').html('<b>Offers found:</b> <br />');  //reset output
+					for (var i = 0; i < len; i++) {		//iterate over array in JS not in solidity to contract out of gas
+						(function (i) {									//js closure
+							LoanDB.getLoan(i, {from:curAcct}).then(function(addr) {		//get loan at loop index i
+								curLoan = new EmbarkJS.Contract({
+									abi: Loan.abi,
+									address: addr
+								});
+
+								Promise.all([	//get all the loan data
+									takenPromise(curLoan),  //0 taken/avail
+									requestPromise(curLoan),		//1 request/offer
+									amtPromise(curLoan), //2 loan amount in ether
+									rpyPromise(curLoan), //3 repayment amt in ether
+									durPromise(curLoan),		//4 loan duration in days
+									minScorePromise(curLoan)  //5 min borrower credit score
+									]).then(function(values){
+											if (!values[0] && !values[1]) {		//if loan is avail and is offer
+												//output loan params
+												var interest = ((parseFloat(values[3]) - parseFloat(values[2])) / parseFloat(values[2]) * 100).toFixed(2);
+												$('#user .borrow .view-of-result').append(i + ': <b>OFFER</b>' +  //index
+													' Borrow ' + values[2]  + ' ETH // Repay ' + values[3] + ' ETH // ' + values[4] +
+													' days // Interest: ' + interest + '% // Minimum credit score: ' + values[5] + '<br />');
+											}
+										}).catch('Promise.all rejection');
+							});
+						})(i);
+					}
+				}
+			});			
+		}
 	});
 
 	//14.04 - Borrow ETH - take loan offer
 	$('#user .borrow button.take-of').click(function() {
-		var index = $('#user .borrow input.index').val();
-		if(validateIndex(index)) {
+		if (loggedIn()) {
+			var index = $('#user .borrow input.index').val();
+			if(validateIndex(index)) {
 
-				LoanDB.getLoan(index, {from: curAcct}).then(function(addr) {
-				curLoan = new EmbarkJS.Contract({
-					abi: Loan.abi,
-					address: addr
-				});
+					LoanDB.getLoan(index, {from: curAcct}).then(function(addr) {
+					curLoan = new EmbarkJS.Contract({
+						abi: Loan.abi,
+						address: addr
+					});
 
-				curLoan.taken().then(function(tkn) {  //check if loan is avail
-					if(!tkn) {													//if so
-						Promise.all([																														//values
-							curLoan.takeLoan({from: curAcct, gas:4700000}).then(function(success) { //0 take loan
-								console.log(success);
-								console.log(success.name);
-								return success;
-							}),
-							amtPromise(curLoan),																									//1 amt
-							rpyPromise(curLoan),																									//2 rpy
-							minScorePromise(curLoan),																							//3 minscore
-							LoanDB.getCreditScore(curAcct, {from:curAcct}).then(function(brwScore) { //4 borrower credit score
-								return brwScore.toNumber();
-							}),
-							durPromise(curLoan)																										//5 duration
-							]).then(function(values) {
-								Promise.all([										//innerValues
-									takenPromise(curLoan),				//0 success/failure
-									deadlinePromise(curLoan),			//1 deadline
-									ownerPromise(curLoan),				//2 owner promise
-									borrowerPromise(curLoan)			//3 borrower promise
-									]).then(function(innerValues) {
-										if(innerValues[0]) {	//if taken i.e. success
-											var interest = ((parseFloat(values[2]) - parseFloat(values[1])) / parseFloat(values[1]) * 100).toFixed(2);
-											$('#user .borrow .take-of-result').html('<b>Successfully took loan</b>' +
-												'<br />Loan address: <code>' + addr + '</code>' +
-												'<br />Borrowed ' + values[1] + ' ETH for ' + values[5] + ' days at ' + interest + '%' +
-												'<br />Repay ' + values[2] + ' ETH by ' + innerValues[1]);
-										}
-										else if (!innerValues[0] && innerValues[2] == curAcct){ //if loan not taken & trying to take own offer
-											$('#user .borrow .take-of-result').html('<b>ERROR: You can\'t take your own loan offer</b>' +
-												'<br />This is a mechanism to prevent you from gaming the credit score system');
-										}
-										else if (!innerValues[0] && values[4] < values[3]) { //if credit score too low
-											$('#user .borrow .take-of-result').html("<font color='red'><b>DENIED: Your credit score is too low</b></font>" +
-												'<br />Your credit score: ' + values[4] +
-												'<br />Minimum required score: ' + values[3]);
-										}
-										else {	//generic failure case
-											$('#user .borrow .take-of-result').html('<b>ERROR: Something went wrong</b>');
-										}
-									});
-							});
-					}
+					curLoan.taken().then(function(tkn) {  //check if loan is avail
+						if(!tkn) {													//if so
+							Promise.all([																														//values
+								curLoan.takeLoan({from: curAcct, gas:4700000}).then(function(success) { //0 take loan
+									console.log(success);
+									console.log(success.name);
+									return success;
+								}),
+								amtPromise(curLoan),																									//1 amt
+								rpyPromise(curLoan),																									//2 rpy
+								minScorePromise(curLoan),																							//3 minscore
+								LoanDB.getCreditScore(curAcct, {from:curAcct}).then(function(brwScore) { //4 borrower credit score
+									return brwScore.toNumber();
+								}),
+								durPromise(curLoan)																										//5 duration
+								]).then(function(values) {
+									Promise.all([										//innerValues
+										takenPromise(curLoan),				//0 success/failure
+										deadlinePromise(curLoan),			//1 deadline
+										ownerPromise(curLoan),				//2 owner promise
+										borrowerPromise(curLoan)			//3 borrower promise
+										]).then(function(innerValues) {
+											if(innerValues[0]) {	//if taken i.e. success
+												var interest = ((parseFloat(values[2]) - parseFloat(values[1])) / parseFloat(values[1]) * 100).toFixed(2);
+												$('#user .borrow .take-of-result').html('<b>Successfully took loan</b>' +
+													'<br />Loan address: <code>' + addr + '</code>' +
+													'<br />Borrowed ' + values[1] + ' ETH for ' + values[5] + ' days at ' + interest + '%' +
+													'<br />Repay ' + values[2] + ' ETH by ' + innerValues[1]);
+											}
+											else if (!innerValues[0] && innerValues[2] == curAcct){ //if loan not taken & trying to take own offer
+												$('#user .borrow .take-of-result').html('<b>ERROR: You can\'t take your own loan offer</b>' +
+													'<br />This is a mechanism to prevent you from gaming the credit score system');
+											}
+											else if (!innerValues[0] && values[4] < values[3]) { //if credit score too low
+												$('#user .borrow .take-of-result').html("<font color='red'><b>DENIED: Your credit score is too low</b></font>" +
+													'<br />Your credit score: ' + values[4] +
+													'<br />Minimum required score: ' + values[3]);
+											}
+											else {	//generic failure case
+												$('#user .borrow .take-of-result').html('<b>ERROR: Something went wrong</b>');
+											}
+										});
+								});
+						}
+					});
 				});
-			});
+			}			
 		}
 	});
 
 	//13.04 - Borrow ETH - make request
 	$('#user .borrow button.make-rq').click(function() {
-		var amt = $('#user .borrow input.amt').val();
-		var rpy = $('#user .borrow input.rpy').val();
-		var dur = $('#user .borrow input.dur').val();
+		if (loggedIn()) {
+			var amt = $('#user .borrow input.amt').val();
+			var rpy = $('#user .borrow input.rpy').val();
+			var dur = $('#user .borrow input.dur').val();
 
-		if (validateInputs([amt, rpy, dur])) {
-			var amtWei = web3.toWei(amt, 'ether');
-			var rpyWei = web3.toWei(rpy, 'ether');
-			//deploy params: amount, repayment, duration, minScore, isRequest, dbAddr
-			Loan.deploy([amtWei, rpyWei, dur, 0, true, dbAddr], {from:curAcct})
-			.then(function(deployedLoan) {
-				LoanDB.pushLoan(deployedLoan.address).then(function() {
-					//var bal = getEtherBalance(deployedLoan.address);
-					var interest = ((parseFloat(rpyWei) - parseFloat(amtWei)) / parseFloat(amtWei) * 100).toFixed(2);
-					$('#user .borrow .make-rq-result').html(
-						'Successfully created loan request: <code>' + deployedLoan.address + '</code>' +
-						'<br />Requesting ' + amt + ' ETH for ' + dur + ' days at ' + interest + '%' +
-						'<br />Repayment amount: ' + rpy + 'ETH' +
-						'<br />Borrower: <code>' + curAcct + '</code>');
+			if (validateInputs([amt, rpy, dur])) {
+				var amtWei = web3.toWei(amt, 'ether');
+				var rpyWei = web3.toWei(rpy, 'ether');
+				//deploy params: amount, repayment, duration, minScore, isRequest, dbAddr
+				Loan.deploy([amtWei, rpyWei, dur, 0, true, dbAddr], {from:curAcct})
+				.then(function(deployedLoan) {
+					LoanDB.pushLoan(deployedLoan.address).then(function() {
+						//var bal = getEtherBalance(deployedLoan.address);
+						var interest = ((parseFloat(rpyWei) - parseFloat(amtWei)) / parseFloat(amtWei) * 100).toFixed(2);
+						$('#user .borrow .make-rq-result').html(
+							'Successfully created loan request: <code>' + deployedLoan.address + '</code>' +
+							'<br />Requesting ' + amt + ' ETH for ' + dur + ' days at ' + interest + '%' +
+							'<br />Repayment amount: ' + rpy + 'ETH' +
+							'<br />Borrower: <code>' + curAcct + '</code>');
+					});
 				});
-			});
+			}
 		}
 	});
 
