@@ -1,25 +1,20 @@
 pragma solidity ^0.4.8;
-// https://www.ethereum.org/token
+// adapted from https://www.ethereum.org/token
 contract Owned {
 
   address public owner;
-  bool transferred; //10.04
+  bool transferred;
 
   function Owned() {
     owner = msg.sender;
-    transferred = false; //10.04
+    transferred = false;
   }
-  
-  //10.04
-  // modifier onlyLender {
-  //   if (requestFilled = true) throw;
-  //   _;
-  // }
 
-  //10.04
   function transferToLender(address lender) {
-    owner = lender;
-    transferred = true;
+    if (transferred == false) {
+      owner = lender;
+      transferred = true;
+    }
   }
 
   modifier onlyOwner {

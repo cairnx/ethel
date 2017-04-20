@@ -25,8 +25,6 @@ $(document).ready(function() {
 
 	var curLoan;
 	var curLoanIndex;
-	var addrReg; //23.03 marked for deletion
-	var loans = []; //24.03 marked for deletion - promises wont let me store loans in a JS variable
 
 	//02.04
 	//curAcct = web3.eth.defaultAccount;
@@ -429,7 +427,7 @@ $(document).ready(function() {
 						curLoan.minScore({from:curAcct}).then(function(minScore) { //3 minScore
 							return minScore.toNumber();
 						}),
-						ldb.getCreditScore(curAcct, {from:curAcct}).then(function(brwScore) { //4 borrower credit score
+						LoanDB.getCreditScore(curAcct, {from:curAcct}).then(function(brwScore) { //4 borrower credit score
 							return brwScore.toNumber();
 						})
 						]).then(function(values) {
@@ -487,7 +485,7 @@ $(document).ready(function() {
   	var index = parseInt($('#intro .loandb .rpy-ln input').val());
 
   	//first get the loan
-  	ldb.getLoan(index, {from: curAcct}).then(function(addr) {
+  	LoanDB.getLoan(index, {from: curAcct}).then(function(addr) {
   		curLoan = new EmbarkJS.Contract({
   			abi: Loan.abi,
   			address:  addr
@@ -538,7 +536,7 @@ $(document).ready(function() {
 	//05.04
 	$('#intro .loandb .get-br button').click(function() {
 		var index = $('#intro .loandb .get-br input').val();
-		ldb.getLoan(index , {from: curAcct}).then(function(addr) {
+		LoanDB.getLoan(index , {from: curAcct}).then(function(addr) {
 			curLoan = new EmbarkJS.Contract({
 				abi: Loan.abi,
 				address: addr
@@ -556,7 +554,7 @@ $(document).ready(function() {
 	$('#intro .loandb .get-taken button').click(function() {
 		var index = $('#intro .loandb .get-taken input').val();
 		//alert(index);
-		ldb.getLoan(index , {from: curAcct}).then(function(addr) {
+		LoanDB.getLoan(index , {from: curAcct}).then(function(addr) {
 			curLoan = new EmbarkJS.Contract({
 				abi: Loan.abi,
 				address: addr
@@ -657,7 +655,7 @@ $(document).ready(function() {
 				else $('#intro .loandb .add .result').append('Error: loan amt and rpy not initialised');
 			});
 */
-			ldb.pushLoan(deployedLoan.address, {from: curAcct}).then(function() {
+			LoanDB.pushLoan(deployedLoan.address, {from: curAcct}).then(function() {
 				$('#intro .loandb .add .result').append('<br />Added to LoanDB');
 
 				web3.eth.sendTransaction({from: curAcct, to: deployedLoan.address, value: amtWei});
@@ -681,7 +679,7 @@ $(document).ready(function() {
 			$('#intro .loandb .rq .result').html('Loan request deployed: ' + deployedLoan.address + '(' + amt +
 				', ' + rpy + ')');
 
-			ldb.pushLoan(deployedLoan.address, {from: curAcct}).then(function() {
+			LoanDB.pushLoan(deployedLoan.address, {from: curAcct}).then(function() {
 				$('#intro .loandb .rq .result').append('<br />Added to LoanDB');
 			});
 		});
@@ -691,7 +689,7 @@ $(document).ready(function() {
 	$('#intro .loandb .fill-rq button').click(function() {
 		var index = $('#intro .loandb .fill-rq input').val();
 
-		ldb.getLoan(index, {from:curAcct}).then(function(addr) {
+		LoanDB.getLoan(index, {from:curAcct}).then(function(addr) {
 			curLoan = new EmbarkJS.Contract({
 				abi: Loan.abi,
 				address: addr
@@ -733,13 +731,13 @@ $(document).ready(function() {
 	$('#intro .loandb .rm button').click(function() {
 		var index = $('#intro .loandb .rm input').val();
 
-		ldb.getLen({from:curAcct}).then(function(len) {
+		LoanDB.getLen({from:curAcct}).then(function(len) {
 			var len = parseInt(len);
 			if (index < 0 || index > len) {
 				alert('Loan not found at index');
 			}
 			else {
-				ldb.getLoan(index, {from:curAcct}).then(function(addr) {
+				LoanDB.getLoan(index, {from:curAcct}).then(function(addr) {
 					curLoan = new EmbarkJS.Contract({
 						abi: Loan.abi,
 						address: addr
@@ -747,7 +745,7 @@ $(document).ready(function() {
 
 					curLoan.owner.call({from: curAcct}).then(function(owner) {
 						if (curAcct == owner) {
-							ldb.rmLoan(index, {from:curAcct}).then(function() {
+							LoanDB.rmLoan(index, {from:curAcct}).then(function() {
 								curLoan.kill({from:curAcct}).then(function() {
 									$('#intro .loandb .rm .result').html('removed loan: ' + addr);
 								});
@@ -761,7 +759,7 @@ $(document).ready(function() {
 								curLoan.kill({from:curAcct}).then(function() {
 									return "Loan removed from blockchain";
 								}),
-								ldb.rmLoan()
+								LoanDB.rmLoan()
 								]).then(function(values) {
 
 								});
@@ -773,7 +771,7 @@ $(document).ready(function() {
 
 /*					curLoan.kill({from:curAcct}).then(function() {
 						var rmAddr = addr.toString();
-						ldb.rmLoan(index, {from:curAcct}).then(function() {
+						LoanDB.rmLoan(index, {from:curAcct}).then(function() {
 							$('#intro .loandb .rm .result').html('removed loan: ' + rmAddr);
 						}).catch('LoanDB.rmLoan promise rejection');
 					}).catch(function() {
@@ -812,13 +810,13 @@ $(document).ready(function() {
 			alert('invalid index: enter a positive integer');
 		}
 
-		ldb.getLen({from:curAcct}).then(function(len) {
+		LoanDB.getLen({from:curAcct}).then(function(len) {
 			len = parseInt(len);
 			if (len == 0) { alert('no loans in database'); }
 			else if (index > len) { alert('index out of bounds'); };
-		}).catch('ldb.getLen promise rejection');
+		}).catch('LoanDB.getLen promise rejection');
 
-		ldb.getLoan(index, {from: curAcct}).then(function(addr) {
+		LoanDB.getLoan(index, {from: curAcct}).then(function(addr) {
 			curLoanIndex = index; //marked for deletion
 			curLoan = new EmbarkJS.Contract({
   	    abi: Loan.abi,
@@ -870,50 +868,50 @@ $(document).ready(function() {
 						'<br />Borrower: ' + values[8]  
 						);
 				});
-		}).catch('ldb.getLoan promise rejection');
+		}).catch('LoanDB.getLoan promise rejection');
 	});
 
 	$('#intro .loandb .inspect button.clr').click(function() {
 		$('#intro .loandb .inspect .result').html('');
 	});
 
-	$('#intro .loandb .set-ldb button.set').click(function() {
-		var index = $('#intro .loandb .set-ldb input.index').val();
-		ldb.getLoan(index, {from: curAcct}).then(function(addr) {
+	$('#intro .loandb .set-LoanDB button.set').click(function() {
+		var index = $('#intro .loandb .set-LoanDB input.index').val();
+		LoanDB.getLoan(index, {from: curAcct}).then(function(addr) {
 			curLoanIndex = index; //marked for deletion
 			curLoan = new EmbarkJS.Contract({
   	    abi: Loan.abi,
   	    address: addr
   		});
-  		curLoan.setLdb(dbAddr, {from: curAcct}).then(function() {
-  			$('#intro .loandb .set-ldb .result').html('Set ldb for loan at <code>' + index + '</code>');
-  		}).catch('setLdb promise rejection');
+  		curLoan.setLoanDB(dbAddr, {from: curAcct}).then(function() {
+  			$('#intro .loandb .set-LoanDB .result').html('Set LoanDB for loan at <code>' + index + '</code>');
+  		}).catch('setLoanDB promise rejection');
   	});
-/*  	var loanAddr = $('#intro .loandb .set-ldb input.loanAddr').val();
-  	var loanDBAddr = $('#intro .loandb .set-ldb input.loanDBAddr').val();
+/*  	var loanAddr = $('#intro .loandb .set-LoanDB input.loanAddr').val();
+  	var loanDBAddr = $('#intro .loandb .set-LoanDB input.loanDBAddr').val();
   	curLoan = new EmbarkJS.Contract({
   		abi: Loan.abi,
   		address: loanAddr
   	});
-  	curLoan.setLdb(dbAddr, {from: curAcct}).then(function() {
-  		$('#intro .loandb .set-ldb .result').html('Set ldb');
-  		$('#intro .loandb .set-ldb .result').append('<br />input db addr: ' + loanDBAddr +
+  	curLoan.setLoanDB(dbAddr, {from: curAcct}).then(function() {
+  		$('#intro .loandb .set-LoanDB .result').html('Set LoanDB');
+  		$('#intro .loandb .set-LoanDB .result').append('<br />input db addr: ' + loanDBAddr +
   			'<br />default db addr: ' + dbAddr);
   	});*/
 	});
 
 	//11.04 marked for deletion - refactor to provide all loans with db addr thru constructor
-	$('#intro .loandb .set-ldb button.get').click(function() {
-		var index = $('#intro .loandb .set-ldb input').val();
-		ldb.getLoan(index, {from: curAcct}).then(function(addr) {
+	$('#intro .loandb .set-LoanDB button.get').click(function() {
+		var index = $('#intro .loandb .set-LoanDB input').val();
+		LoanDB.getLoan(index, {from: curAcct}).then(function(addr) {
 			curLoanIndex = index; //marked for deletion
 			curLoan = new EmbarkJS.Contract({
   	    abi: Loan.abi,
   	    address: addr
   		});
-  		curLoan.getLdbAddr({from: curAcct}).then(function(ldbAddr) {
-  			ldbAddr = ldbAddr.toString();
-  			$('#intro .loandb .set-ldb .result').html('LoanDB address: ' + ldbAddr );
+  		curLoan.getLoanDBAddr({from: curAcct}).then(function(LoanDBAddr) {
+  			LoanDBAddr = LoanDBAddr.toString();
+  			$('#intro .loandb .set-LoanDB .result').html('LoanDB address: ' + LoanDBAddr );
   		});
     });
 	});
@@ -922,25 +920,25 @@ $(document).ready(function() {
 	$('#intro .loandb .credit button.get').click(function() {
 		var userAddr = $('#intro .loandb .credit input.user-addr').val();
 
-		//ldb.getCreditScore(userAddr, {from:curAcct}).then(function(score) {
-		ldb.getCreditScore(userAddr,{from:curAcct}).then(function(score) {
+		//LoanDB.getCreditScore(userAddr, {from:curAcct}).then(function(score) {
+		LoanDB.getCreditScore(userAddr,{from:curAcct}).then(function(score) {
 			$('#intro .loandb .credit .result').html('score: ' + score);
 		});
-/*		$('#intro .loandb .credit .result').html('user: ' + userAddr + ' score: ' + ldb.creditScore[userAddr] +
-			'<br />ldb.getCreditScore: ' + ldb.getCreditScore());*/
+/*		$('#intro .loandb .credit .result').html('user: ' + userAddr + ' score: ' + LoanDB.creditScore[userAddr] +
+			'<br />LoanDB.getCreditScore: ' + LoanDB.getCreditScore());*/
 	});
 
 	$('#intro .loandb .credit button.set').click(function() {
 		var index = $('#intro .loandb .credit input.user-addr').val();
 
-		ldb.setCreditScore(index, {from:curAcct}).then(function() {
+		LoanDB.setCreditScore(index, {from:curAcct}).then(function() {
 			$('#intro .loandb .credit .result').html('set score for loan at  ' + index);
 		});
 	});
 
 	$('#intro .loandb .get-b button').click(function() {
 		var index = $('#intro .loandb .get-b input.index').val();
-		ldb.getBorrower(index, {from:curAcct}).then(function(brw) {
+		LoanDB.getBorrower(index, {from:curAcct}).then(function(brw) {
 			brw = brw.toString();
 			$('#intro .loandb .get-b .result').html(brw);
 		});
@@ -990,7 +988,7 @@ $(document).ready(function() {
 			'Currently logged in as: <code>' + curAcct + '</code>' +
 			'<br />Account balance: ' + getEtherBalance(curAcct) + ' ETH' +
 			'<br />Credit score: ');
-		ldb.getCreditScore(curAcct, {from:curAcct}).then(function(score) { 
+		LoanDB.getCreditScore(curAcct, {from:curAcct}).then(function(score) { 
 		  $('#user .login .result').append(score.toNumber())
 	  });
 	}	
@@ -1103,15 +1101,15 @@ $(document).ready(function() {
 
 	//13.04 - View all loans and offers for this user
 	$('#user .cp button.all').click(function() {
-		ldb.getLen({from:curAcct}).then(function(len) {
-			if (len == 0 ) {  //if no loans in ldb
+		LoanDB.getLen({from:curAcct}).then(function(len) {
+			if (len == 0 ) {  //if no loans in LoanDB
 				$('#user .cp .result').html('No loans in database');
 			}
 			else {
 				$('#user .cp .result').html('<b>All loans lent, loans taken, requests and offers:</b> <br />');  //reset output
 				for (var i = 0; i < len; i++) {		//iterate over array in JS not in solidity to contract out of gas
 					(function (i) {									//js closure
-						ldb.getLoan(i, {from:curAcct}).then(function(addr) {		//get loan at loop index i
+						LoanDB.getLoan(i, {from:curAcct}).then(function(addr) {		//get loan at loop index i
 							curLoan = new EmbarkJS.Contract({
 								abi: Loan.abi,
 								address: addr
@@ -1180,17 +1178,17 @@ $(document).ready(function() {
 		});	
 	});
 
-	//13.04 - View all loans lent by this user
+	//User cp - View all loans lent by this user
 	$('#user .cp button.lent').click(function() {
-		ldb.getLen({from:curAcct}).then(function(len) {
-			if (len == 0 ) {  //if no loans in ldb
+		LoanDB.getLen({from:curAcct}).then(function(len) {
+			if (len == 0 ) {  //if no loans in LoanDB
 				$('#user .cp .result').html('No loans in database');
 			}
 			else {
 				$('#user .cp .result').html('<b>Loans you\'ve lent:</b> <br />');  //reset output
 				for (var i = 0; i < len; i++) {		//iterate over array in JS not in solidity to contract out of gas
 					(function (i) {									//js closure
-						ldb.getLoan(i, {from:curAcct}).then(function(addr) {		//get loan at loop index i
+						LoanDB.getLoan(i, {from:curAcct}).then(function(addr) {		//get loan at loop index i
 							curLoan = new EmbarkJS.Contract({
 								abi: Loan.abi,
 								address: addr
@@ -1211,7 +1209,7 @@ $(document).ready(function() {
 										if (values[0] && values[5] == curAcct) {		//if loan is taken and user is owner
 											//and belongs to logged in user
 											//output loan params
-											var interest = (parseInt(values[3]) - parseInt(values[2])) / parseInt(values[3]) * 100;
+											var interest = ((parseFloat(values[3]) - parseFloat(values[2])) / parseFloat(values[2]) * 100).toFixed(2);
 											$('#user .cp .result').append(i + ': ' +  //index
 												' <b>LENT</b> // Lent ' + values[2]  + ' ETH // Repayment ' + values[3] + ' ETH // ' + values[4] +
 												' days // Interest: ' + interest + '% // Deadline: ' + values[6] + values[8] + 
@@ -1228,15 +1226,15 @@ $(document).ready(function() {
 
 	//13.04 - View all loans taken by this user
 	$('#user .cp button.taken').click(function() {
-		ldb.getLen({from:curAcct}).then(function(len) {
-			if (len == 0 ) {  //if no loans in ldb
+		LoanDB.getLen({from:curAcct}).then(function(len) {
+			if (len == 0 ) {  //if no loans in LoanDB
 				$('#user .cp .result').html('No loans in database');
 			}
 			else {
 				$('#user .cp .result').html('<b>Loans you\'ve taken:</b> <br />');  //reset output
 				for (var i = 0; i < len; i++) {		//iterate over array in JS not in solidity to contract out of gas
 					(function (i) {									//js closure
-						ldb.getLoan(i, {from:curAcct}).then(function(addr) {		//get loan at loop index i
+						LoanDB.getLoan(i, {from:curAcct}).then(function(addr) {		//get loan at loop index i
 							curLoan = new EmbarkJS.Contract({
 								abi: Loan.abi,
 								address: addr
@@ -1257,7 +1255,7 @@ $(document).ready(function() {
 									if (values[0] && values[5] == curAcct) {		//if loan is taken and user is borrower
 										//and belongs to logged in user
 										//output loan params
-										var interest = (parseInt(values[3]) - parseInt(values[2])) / parseInt(values[3]) * 100;
+										var interest = ((parseFloat(values[3]) - parseFloat(values[2])) / parseFloat(values[2]) * 100).toFixed(2);
 										$('#user .cp .result').append(i + ': ' +  //index
 											' <b>TAKEN</b> // Borrowed ' + values[2]  +
 											' ETH // Repay ' + values[3] + ' ETH // '+
@@ -1276,15 +1274,15 @@ $(document).ready(function() {
 
 	//13.04 - View all loan offers from this user
 	$('#user .cp button.offers').click(function() {
-		ldb.getLen({from:curAcct}).then(function(len) {
-			if (len == 0 ) {  //if no loans in ldb
+		LoanDB.getLen({from:curAcct}).then(function(len) {
+			if (len == 0 ) {  //if no loans in LoanDB
 				$('#user .cp .result').html('No loans in database');
 			}
 			else {
 				$('#user .cp .result').html('<b>Your loan offers:</b> <br />');  //reset output
 				for (var i = 0; i < len; i++) {		//iterate over array in JS not in solidity to contract out of gas
 					(function (i) {									//js closure
-						ldb.getLoan(i, {from:curAcct}).then(function(addr) {		//get loan at loop index i
+						LoanDB.getLoan(i, {from:curAcct}).then(function(addr) {		//get loan at loop index i
 							curLoan = new EmbarkJS.Contract({
 								abi: Loan.abi,
 								address: addr
@@ -1301,7 +1299,7 @@ $(document).ready(function() {
 										if (!values[0] && !values[1] && values[6] == curAcct) {		//if loan is avail and is offer
 											//and belongs to logged in user
 											//output loan params
-											var interest = (parseInt(values[3]) - parseInt(values[2])) / parseInt(values[3]) * 100;
+											var interest = ((parseInt(values[3]) - parseInt(values[2])) / parseInt(values[2]) * 100).toFixed(2);
 											$('#user .cp .result').append(i + ':' +  //index
 												' <b>OFFER</b> // Offering ' + values[2]  + ' ETH // Repay ' + values[3] + ' ETH // ' + values[4] +
 												' days // Interest: ' + interest + '% // Minimum score ' + values[5] + '<br />');
@@ -1316,15 +1314,15 @@ $(document).ready(function() {
 
 	//13.04 - View all loan requests from this user
 	$('#user .cp button.requests').click(function() {
-		ldb.getLen({from:curAcct}).then(function(len) {
-			if (len == 0 ) {  //if no loans in ldb
+		LoanDB.getLen({from:curAcct}).then(function(len) {
+			if (len == 0 ) {  //if no loans in LoanDB
 				$('#user .cp .result').html('No loans in database');
 			}
 			else {
 				$('#user .cp .result').html('<b>Your loan requests:</b> <br />');  //reset output
 				for (var i = 0; i < len; i++) {		//iterate over array in JS not in solidity to contract out of gas
 					(function (i) {									//js closure
-						ldb.getLoan(i, {from:curAcct}).then(function(addr) {		//get loan at loop index i
+						LoanDB.getLoan(i, {from:curAcct}).then(function(addr) {		//get loan at loop index i
 							curLoan = new EmbarkJS.Contract({
 								abi: Loan.abi,
 								address: addr
@@ -1339,7 +1337,7 @@ $(document).ready(function() {
 								]).then(function(values){
 										if (values[1] && values[5] == curAcct) {		//if loan is request and owned by logged in user
 											//output loan params
-											var interest = (parseInt(values[3]) - parseInt(values[2])) / parseInt(values[3]) * 100;
+											var interest = ((parseFloat(values[3]) - parseFloat(values[2])) / parseFloat(values[2]) * 100).toFixed(2);
 											$('#user .cp .result').append(i + ': ' +  //index
 												' <b>REQUEST</b> Requesting ' + values[2]  + ' ETH // Repay ' + values[3] +
 												' ETH // ' + values[4] + ' days // Interest: ' + interest + '% <br />');
@@ -1357,7 +1355,7 @@ $(document).ready(function() {
 		var index = $('#user .repay-loan input.index').val();
 
 		if(validateIndex(index)) {
-			ldb.getLoan(index, {from:curAcct}).then(function(addr) {
+			LoanDB.getLoan(index, {from:curAcct}).then(function(addr) {
 				curLoan = new EmbarkJS.Contract({
 					abi: Loan.abi,
 					address: addr
@@ -1401,7 +1399,7 @@ $(document).ready(function() {
 	  var index = $('#user .rm-loan input.index').val();
 
 		if(validateIndex(index)) {
-			ldb.getLoan(index, {from:curAcct}).then(function(addr) {
+			LoanDB.getLoan(index, {from:curAcct}).then(function(addr) {
 				curLoan = new EmbarkJS.Contract({
 					abi: Loan.abi,
 					address: addr
@@ -1446,7 +1444,7 @@ $(document).ready(function() {
 						}
 						else { outStr = "<b>Uncategorised loan type</b>" ;}
 						if(values[0] == curAcct) {
-							ldb.rmLoan(index, {from:curAcct, gas:4700000}).then(function() {
+							LoanDB.rmLoan(index, {from:curAcct, gas:4700000}).then(function() {
 								curLoan.kill({from:curAcct}).then(function() {
 									$('#user .rm-loan .result').html('<b>Successfully removed loan</b>' +
 										'<br />' + outStr + 
@@ -1462,7 +1460,7 @@ $(document).ready(function() {
 						}
 					});//.catch(console.log('Promise.all rejection'));
 					//alert(addr + ' bal: ' + bal);
-			});//.catch(indexOutOfBounds());//.catch(console.log('ldb.getLoan rejection'));
+			});//.catch(indexOutOfBounds());//.catch(console.log('LoanDB.getLoan rejection'));
 		}
 	});
 
@@ -1474,15 +1472,15 @@ $(document).ready(function() {
 	//13.04 - Lend ETH - view requests
 	$('#user .lend button.view-rq').click(function() {
 		//first get the array length
-		ldb.getLen({from:curAcct}).then(function(len) {
-			if (len == 0 ) {  //if no loans in ldb
+		LoanDB.getLen({from:curAcct}).then(function(len) {
+			if (len == 0 ) {  //if no loans in LoanDB
 				$('#user .lend .view-rq-result').html('No loans in database');
 			}
 			else {
 				$('#user .lend .view-rq-result').html('<b>Requests found:</b> <br />');  //reset output
 				for (var i = 0; i < len; i++) {		//iterate over array in JS not in solidity to contract out of gas
 					(function (i) {									//js closure
-						ldb.getLoan(i, {from:curAcct}).then(function(addr) {		//get loan at loop index i
+						LoanDB.getLoan(i, {from:curAcct}).then(function(addr) {		//get loan at loop index i
 							curLoan = new EmbarkJS.Contract({
 								abi: Loan.abi,
 								address: addr
@@ -1499,7 +1497,7 @@ $(document).ready(function() {
 								]).then(function(values){
 										if (values[1] && !values[0]) {		//if loan is REQUEST & taken is false i.e. avail = true
 											//output loan params
-											var interest = ((parseFloat(values[3]) - parseFloat(values[2])) / parseFloat(values[3]) * 100).toFixed(2);
+											var interest = ((parseFloat(values[3]) - parseFloat(values[2])) / parseFloat(values[2]) * 100).toFixed(2);
 											$('#user .lend .view-rq-result').append(i + ': <b>REQEUST</b>' +  //index
 												' Borrow ' + values[2]  + ' ETH // Repay ' + values[3] + ' ETH // ' + values[4] +
 												' days // Interest: ' + interest +'% // Requester credit score: ' + values[5] + '<br />');
@@ -1522,7 +1520,7 @@ $(document).ready(function() {
 		var index = $('#user .lend input.fill-rq-index').val();
 
 		if (validateIndex(index)) {
-			ldb.getLoan(index, {from:curAcct}).then(function(addr) {
+			LoanDB.getLoan(index, {from:curAcct}).then(function(addr) {
 				curLoan = new EmbarkJS.Contract({
 					abi: Loan.abi,
 					address: addr
@@ -1531,26 +1529,32 @@ $(document).ready(function() {
 					amtPromise(curLoan), 			//0 amt
 					borrowerPromise(curLoan), //1 borrower
 					durPromise(curLoan),			//2 duration
-					rpyPromise(curLoan)				//3 rpy				
+					rpyPromise(curLoan),				//3 rpy
+					requestPromise(curLoan)		//4 true = request, false = offer
 					]).then(function(values) {
-						if (values[1] == curAcct) {
+						if (!values[4]) {
+							alert('Error: enter the index of a request');
+						}
+						else if (values[1] == curAcct) {
 							alert('Error: You can\'t fill your own request');
 							//$('#user .lend .fill-rq-result').html('<b>ERROR: You can\'t fill your own request</b>');
 						}
 						else {
-							var bal = web3.fromWei(values[0], 'ether');
+							var bal = parseFloat(web3.toWei(values[0]));
+							console.log(bal);
+							alert(ba)l;
 							var rpy = web3.fromWei(values[3], 'ether');
-							var interest = ((parseFloat(values[0]) - parseFloat(3)) / parseFloat[0] * 100);
-							curLoan.fillRequest({from:curAcct, value:bal, gas:4700000}).then(function(success) {
+							var interest = ((parseFloat(values[3]) - parseFloat(values[0])) / parseFloat(values[0]) * 100).toFixed(2);
+							curLoan.fillRequest({from:curAcct, value: bal, gas:4700000}).then(function(success) {
 								$('#user .lend .fill-rq-result').html('Filled loan request: <code>' + addr + '</code>' +
-									'<br />Loaned ' + bal + ' ETH ' + ' for ' + dur + ' days at ' + interest + '%' +
-									'<br />Repayment amount: ' + rpy + ' ETH' +
+									'<br />Loaned ' + values[0] + ' ETH ' + ' for ' + values[2] + ' days at ' + interest + '%' +
+									'<br />Repayment amount: ' + values[3] + ' ETH' +
 									'<br />Borrower: <code>' + values[1]  + '</code>');
 							}).catch(function() { console.log('curLoan.fillRequest rejection')});
 						}
 					}).catch(function() {console.log('Promise.all rejection')});
 			});//.catch(indexOutOfBounds(index));/*catch(function() {
-				/*console.log('ldb.getLoan rejection - index out of bounds');
+				/*console.log('LoanDB.getLoan rejection - index out of bounds');
 				alert('Error: index ' + index + ' out of bounds');
 			});	*/		
 		}
@@ -1569,11 +1573,10 @@ $(document).ready(function() {
 
 			//deploy params: amount, repayment, duration, minScore, isRequest, dbAddr
 			Loan.deploy([amtWei, rpyWei, dur, minScore, false, dbAddr], {from:curAcct, value: amtWei, gas:4700000}).then(function(deployedLoan) {
-				ldb.pushLoan(deployedLoan.address, {from:curAcct, gas:4700000}).then(function() {
+				LoanDB.pushLoan(deployedLoan.address, {from:curAcct, gas:4700000}).then(function() {
 					//web3.eth.sendTransaction({from:curAcct, to: deployedLoan.address, value: amtWei});
 					//var bal = getEtherBalance(deployedLoan.address);
 					var interest = (( parseFloat(rpyWei) - parseFloat(amtWei )) / parseFloat(amtWei) * 100).toFixed(2);
-					alert(interest);
 					$('#user .lend .make-of-result').html(
 						"<font color='green'><b>Successfully created loan offer</b></font>" +
 						'<br />Offering ' + amt + ' ETH for ' + dur + ' days at ' + interest +
@@ -1585,7 +1588,7 @@ $(document).ready(function() {
 		}
 	});
 
-	//13.04 - Lend ETH - clear make offer text input boxes
+	//Lend ETH - clear make offer text input boxes
 	$('#user .lend button.clear').click(function() {
 		$('#user .lend input').val('');
 	});
@@ -1597,15 +1600,15 @@ $(document).ready(function() {
 	//13.04 - Borrow ETH - view offers
 	$('#user .borrow button.view-of').click(function() {
 		//first get the array length
-		ldb.getLen({from:curAcct}).then(function(len) {
-			if (len == 0 ) {  //if no loans in ldb
+		LoanDB.getLen({from:curAcct}).then(function(len) {
+			if (len == 0 ) {  //if no loans in LoanDB
 				$('#user .borrow .view-of-result').html('No loans in database');
 			}
 			else {
 				$('#user .borrow .view-of-result').html('<b>Offers found:</b> <br />');  //reset output
 				for (var i = 0; i < len; i++) {		//iterate over array in JS not in solidity to contract out of gas
 					(function (i) {									//js closure
-						ldb.getLoan(i, {from:curAcct}).then(function(addr) {		//get loan at loop index i
+						LoanDB.getLoan(i, {from:curAcct}).then(function(addr) {		//get loan at loop index i
 							curLoan = new EmbarkJS.Contract({
 								abi: Loan.abi,
 								address: addr
@@ -1639,7 +1642,7 @@ $(document).ready(function() {
 		var index = $('#user .borrow input.index').val();
 		if(validateIndex(index)) {
 
-				ldb.getLoan(index, {from: curAcct}).then(function(addr) {
+				LoanDB.getLoan(index, {from: curAcct}).then(function(addr) {
 				curLoan = new EmbarkJS.Contract({
 					abi: Loan.abi,
 					address: addr
@@ -1656,7 +1659,7 @@ $(document).ready(function() {
 							amtPromise(curLoan),																									//1 amt
 							rpyPromise(curLoan),																									//2 rpy
 							minScorePromise(curLoan),																							//3 minscore
-							ldb.getCreditScore(curAcct, {from:curAcct}).then(function(brwScore) { //4 borrower credit score
+							LoanDB.getCreditScore(curAcct, {from:curAcct}).then(function(brwScore) { //4 borrower credit score
 								return brwScore.toNumber();
 							}),
 							durPromise(curLoan)																										//5 duration
@@ -1668,7 +1671,7 @@ $(document).ready(function() {
 									borrowerPromise(curLoan)			//3 borrower promise
 									]).then(function(innerValues) {
 										if(innerValues[0]) {	//if taken i.e. success
-											var interest = ((parseFloat(values[2]) - parseFloat(values[1])) / parseFloat(values[1]) * 100);
+											var interest = ((parseFloat(values[2]) - parseFloat(values[1])) / parseFloat(values[1]) * 100).toFixed(2);
 											$('#user .borrow .take-of-result').html('<b>Successfully took loan</b>' +
 												'<br />Loan address: <code>' + addr + '</code>' +
 												'<br />Borrowed ' + values[1] + ' ETH for ' + values[5] + ' days at ' + interest + '%' +
@@ -1706,16 +1709,14 @@ $(document).ready(function() {
 			//deploy params: amount, repayment, duration, minScore, isRequest, dbAddr
 			Loan.deploy([amtWei, rpyWei, dur, 0, true, dbAddr], {from:curAcct})
 			.then(function(deployedLoan) {
-				ldb.pushLoan(deployedLoan.address).then(function() {
+				LoanDB.pushLoan(deployedLoan.address).then(function() {
 					//var bal = getEtherBalance(deployedLoan.address);
+					var interest = ((parseFloat(rpyWei) - parseFloat(amtWei)) / parseFloat(amtWei) * 100).toFixed(2);
 					$('#user .borrow .make-rq-result').html(
-						'Loan request created successfully' +
-						'<br />Amount: ' + amt + ' ETH' +
-						'<br />Repayment: ' + rpy + ' ETH' +
-						'<br />Duration: ' + dur + ' days' +
-						'<br />Minimum credit score: N/A' +
-						'<br />Address: <code>' + deployedLoan.address + '</code>'
-						);
+						'Successfully created loan request: <code>' + deployedLoan.address + '</code>' +
+						'<br />Requesting ' + amt + ' ETH for ' + dur + ' days at ' + interest + '%' +
+						'<br />Repayment amount: ' + rpy + 'ETH' +
+						'<br />Borrower: <code>' + curAcct + '</code>');
 				});
 			});
 		}
@@ -1736,7 +1737,7 @@ $(document).ready(function() {
 
   $('#sand .dbmod .get-amt button').click(function() {
   	var index = ('#sand .dbmod .get-amt input').val();
-  	ldb.getLnAmt(index, {from:curAcct}).then(function(amt) {
+  	LoanDB.getLnAmt(index, {from:curAcct}).then(function(amt) {
   		$('#sand .dbmod .get-amt .result').html(amt);
   	});
   });
