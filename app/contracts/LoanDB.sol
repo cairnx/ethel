@@ -9,7 +9,6 @@ contract LoanDB {
 	Loan l;
 
 	function LoanDB() {
-
 	}
 
 	function getLen() constant returns (uint) {
@@ -49,16 +48,6 @@ contract LoanDB {
 		}
 	}
 
-	//11.04  test method
-	//it is possible to retrieve params from Loans like so
-	function getBorrower(uint n) constant returns (address) {
-		address loanAddr = loans[n];
-		l = Loan(loanAddr);
-		address borrower = l.borrower();
-		return borrower;
-	}
-
-	//11.04
 	function setCreditScore(uint n) private {
 		address loanAddr = loans[n];
 		l = Loan(loanAddr);
@@ -68,7 +57,6 @@ contract LoanDB {
 		bool taken = l.taken();
 		uint deadline = l.deadline();
 		uint repaidTime = l.repaidTime();
-		//might need to put creditScore in an int to perform calcs
 		if (repaid == true && repaidTime < deadline) {
 		  creditScore[borrower] = creditScore[borrower] + 1;
 		}
