@@ -510,7 +510,7 @@ $(document).ready(function() {
 					else {
 						curLoan.repay({from: curAcct, value: web3.toWei(values[0],'ether')}).then(function() {
 							alert ('repaid loan: ' + values[0] + ' ether');
-							$('#intro .loandb .rpy-ln .result').html('successfully repaid loan' +
+							$('#intro .loandb .rpy-ln .result').html("<font color = 'green'><b>Successfully repaid loan</b></font>" +
 								'<br />' + values[0] + ' ether sent' +
 								'<br />from: ' + curAcct +
 								'<br />loan: ' + addr);
@@ -700,8 +700,10 @@ $(document).ready(function() {
 				]).then(function(values) {
 					curLoan.fillRequest({from:curAcct, value:values[0]}).then(function(success) {
 						var bal = web3.fromWei(values[0],'ether');
-						$('#intro .loandb .fill-rq .result').html('Filled loan request: ' + addr +
-							'<br />Loaned ' + bal + ' ether' + '<br />To ' + values[1]);
+						$('#intro .loandb .fill-rq .result').html("<font color='green'><b>Successfully filled loan request</b></font>" +
+							'<br />Loaned ' + bal + ' ether' + '<br />To borrower' + values[1] + 
+							'<br />Address:' + addr
+							);
 					});
 				});
 		});
@@ -1176,7 +1178,7 @@ $(document).ready(function() {
 												else if (!values[8]) { values[8] = " // <font color='crimson'><b>AWATING REPAYMENT</b></font>"; }
 											}
 											else if (values[0] && values[6] == curAcct) {
-												typeString = '<b>Borrowed</b> ';
+												typeString = '<b>BORROWED</b> ';
 												values[6] = '<br />Borrower: <code>' + values[6] + '</code>';
 												values[5] = '<br />Owner: <code>' + values[5] + '</code>';
 												displayToUser = true;
@@ -1431,7 +1433,7 @@ $(document).ready(function() {
 							}
 							else {
 								curLoan.repay({from: curAcct, value: web3.toWei(values[0], 'ether'), gas: 4700000}).then(function() {
-									$('#user .repay-loan .result').html('<b>Successfully repaid loan</b>' +
+									$('#user .repay-loan .result').html("<font color = 'green'><b>Successfully repaid loan</b></font>" +
 										'<br />Repaid ' + values[0] + ' ETH' + 
 										//'<br />Loan: <code>' + addr + '</code>' + 
 										'<br />Borrower: <code>' + values[1] + '</code>' +
@@ -1498,7 +1500,7 @@ $(document).ready(function() {
 							if(values[0] == curAcct) {
 								LoanDB.rmLoan(index, {from:curAcct, gas:4700000}).then(function() {
 									curLoan.kill({from:curAcct}).then(function() {
-										$('#user .rm-loan .result').html('<b>Successfully removed loan</b>' +
+										$('#user .rm-loan .result').html("<font color = 'green'><b>Successfully removed loan</b></font>" +
 											'<br />' + outStr + 
 											'<br />Withdrew ' + bal + ' ETH' +
 											//'<br />Loan: <code>' + addr + '</code>' +
@@ -1600,10 +1602,11 @@ $(document).ready(function() {
 								var rpy = web3.fromWei(values[3], 'ether');
 								var interest = ((parseFloat(values[3]) - parseFloat(values[0])) / parseFloat(values[0]) * 100).toFixed(2);
 								curLoan.fillRequest({from:curAcct, value: bal, gas:4700000}).then(function(success) {
-									$('#user .lend .fill-rq-result').html('Filled loan request: <code>' + addr + '</code>' +
+									$('#user .lend .fill-rq-result').html("<font color='green'><b>Filled loan request</b></font>" + 
 										'<br />Loaned ' + values[0] + ' ETH ' + ' for ' + values[2] + ' days at ' + interest + '%' +
 										'<br />Repayment amount: ' + values[3] + ' ETH' +
-										'<br />Borrower: <code>' + values[1]  + '</code>');
+										'<br />Borrower: <code>' + values[1]  + '</code>' +
+										'<br />Loan: <code>' + addr + '</code>');
 								}).catch(function() { console.log('curLoan.fillRequest rejection')});
 							}
 						}).catch(function() {console.log('Promise.all rejection')});
@@ -1638,7 +1641,7 @@ $(document).ready(function() {
 							"<font color='green'><b>Successfully created loan offer</b></font>" +
 							'<br />Offering ' + amt + ' ETH for ' + dur + ' days at ' + interest +
 							'% to borrowers with score ' + minScore + ' or greater' +
-							'<br />Address: <code>' + deployedLoan.address + '</code>'
+							'<br />Loan: <code>' + deployedLoan.address + '</code>'
 							);
 					});
 				});
@@ -1733,10 +1736,11 @@ $(document).ready(function() {
 										]).then(function(innerValues) {
 											if(innerValues[0]) {	//if taken i.e. success
 												var interest = ((parseFloat(values[2]) - parseFloat(values[1])) / parseFloat(values[1]) * 100).toFixed(2);
-												$('#user .borrow .take-of-result').html('<b>Successfully took loan</b>' +
-													'<br />Loan address: <code>' + addr + '</code>' +
+												$('#user .borrow .take-of-result').html("<font color = 'green'><b>Took loan offer</b></font>" +
 													'<br />Borrowed ' + values[1] + ' ETH for ' + values[5] + ' days at ' + interest + '%' +
-													'<br />Repay ' + values[2] + ' ETH by ' + innerValues[1]);
+													'<br />Repay ' + values[2] + ' ETH by ' + innerValues[1] +
+													'<br />Lender: <code>' + innerValues[2] + '</code>' +
+													'<br />Loan: <code>' + addr + '</code>');
 											}
 											else if (!innerValues[0] && innerValues[2] == curAcct){ //if loan not taken & trying to take own offer
 												$('#user .borrow .take-of-result').html('<b>ERROR: You can\'t take your own loan offer</b>' +
@@ -1776,10 +1780,11 @@ $(document).ready(function() {
 						//var bal = getEtherBalance(deployedLoan.address);
 						var interest = ((parseFloat(rpyWei) - parseFloat(amtWei)) / parseFloat(amtWei) * 100).toFixed(2);
 						$('#user .borrow .make-rq-result').html(
-							'Successfully created loan request: <code>' + deployedLoan.address + '</code>' +
+							"<font color='green'><b>Successfully created loan request</b></font>" +
 							'<br />Requesting ' + amt + ' ETH for ' + dur + ' days at ' + interest + '%' +
 							'<br />Repayment amount: ' + rpy + 'ETH' +
-							'<br />Borrower: <code>' + curAcct + '</code>');
+							'<br />Borrower: <code>' + curAcct + '</code>' +
+							'<br />Loan: <code>' + deployedLoan.address + '</code>');
 					});
 				});
 			}
