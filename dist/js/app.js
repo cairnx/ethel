@@ -79773,7 +79773,7 @@ $(document).ready(function() {
 										if (!values[0] && !values[1] && values[6] == curAcct) {		//if loan is avail and is offer
 											//and belongs to logged in user
 											//output loan params
-											var interest = ((parseInt(values[3]) - parseInt(values[2])) / parseInt(values[2]) * 100).toFixed(2);
+											var interest = ((parseFloat(values[3]) - parseFloat(values[2])) / parseFloat(values[2]) * 100).toFixed(2);
 											$('#user .cp .result').append(i + ':' +  //index
 												' <b>OFFER</b> // Offering ' + values[2]  + ' ETH // Repay ' + values[3] + ' ETH // ' + values[4] +
 												' days // Interest: ' + interest + '% // Minimum score ' + values[5] + '<br />');
@@ -80015,8 +80015,6 @@ $(document).ready(function() {
 						}
 						else {
 							var bal = parseFloat(web3.toWei(values[0]));
-							console.log(bal);
-							alert(ba)l;
 							var rpy = web3.fromWei(values[3], 'ether');
 							var interest = ((parseFloat(values[3]) - parseFloat(values[0])) / parseFloat(values[0]) * 100).toFixed(2);
 							curLoan.fillRequest({from:curAcct, value: bal, gas:4700000}).then(function(success) {
