@@ -963,6 +963,7 @@ $(document).ready(function() {
   //******* functions *********
   //***************************
 
+
 	//12.04 function => ls accts and balances
 	function lsAccts() {
 		$('#user .ls-accts .result').html('');
@@ -1591,11 +1592,12 @@ $(document).ready(function() {
 						requestPromise(curLoan)		//4 true = request, false = offer
 						]).then(function(values) {
 							if (!values[4]) {
-								alert('Error: enter the index of a request');
+								alert('Error: enter the index of a loan request');
 							}
 							else if (values[1] == curAcct) {
-								alert('Error: You can\'t fill your own request');
-								//$('#user .lend .fill-rq-result').html('<b>ERROR: You can\'t fill your own request</b>');
+								//alert('Error: You can\'t fill your own request');
+
+							  $('#user .lend .fill-rq-result').html('<b>ERROR: You can\'t fill your own request</b>');
 							}
 							else {
 								var bal = parseFloat(web3.toWei(values[0]));
@@ -1726,7 +1728,8 @@ $(document).ready(function() {
 								LoanDB.getCreditScore(curAcct, {from:curAcct}).then(function(brwScore) { //4 borrower credit score
 									return brwScore.toNumber();
 								}),
-								durPromise(curLoan)																										//5 duration
+								durPromise(curLoan),																										//5 duration
+								requestPromise(curLoan)																									//6 request true false
 								]).then(function(values) {
 									Promise.all([										//innerValues
 										takenPromise(curLoan),				//0 success/failure
@@ -1742,14 +1745,16 @@ $(document).ready(function() {
 													'<br />Lender: <code>' + innerValues[2] + '</code>' +
 													'<br />Loan: <code>' + addr + '</code>');
 											}
-											else if (!innerValues[0] && innerValues[2] == curAcct){ //if loan not taken & trying to take own offer
-												$('#user .borrow .take-of-result').html('<b>ERROR: You can\'t take your own loan offer</b>' +
-													'<br />This is a mechanism to prevent you from gaming the credit score system');
+											else if (!innerValues[0] && innerValues[2] == curAcct && !values[6]){ //if loan not taken & trying to take own offer
+												$('#user .borrow .take-of-result').html('<b>ERROR: You can\'t take your own loan offer</b>');
 											}
 											else if (!innerValues[0] && values[4] < values[3]) { //if credit score too low
-												$('#user .borrow .take-of-result').html("<font color='red'><b>DENIED: Your credit score is too low</b></font>" +
+												$('#user .borrow .take-of-result').html("<font color='red'><b>ERROR: Your credit score is too low</b></font>" +
 													'<br />Your credit score: ' + values[4] +
 													'<br />Minimum required score: ' + values[3]);
+											}
+											else if (!innerValues[0]) {
+												$('#user .borrow .take-of-result').html('<b>ERROR: Available offer not found at index</b>');
 											}
 											else {	//generic failure case
 												$('#user .borrow .take-of-result').html('<b>ERROR: Something went wrong</b>');
@@ -1757,9 +1762,13 @@ $(document).ready(function() {
 										});
 								});
 						}
+						else {
+						  $('#user .borrow .take-of-result').html('<b>ERROR: Available offer not found at index</b>');
+
+						}
 					});
 				});
-			}			
+			}
 		}
 	});
 

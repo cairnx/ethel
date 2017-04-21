@@ -2,7 +2,7 @@ pragma solidity ^0.4.8;
 import "Mortal.sol";
 import "Loan.sol";
 
-contract LoanDB {
+contract LoanDB is Mortal {
 
 	address[] loans;
 	mapping(address => int) public creditScore;
